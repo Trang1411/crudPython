@@ -7,28 +7,52 @@
 <body>
 <div>
     <h1>Form đăng ký</h1>
-    <form action="javascript:saveForm()" method="POST" style="text-align: center">
-        <div>
+    <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center">
+       <div>
             <label>Config </label> <span>
-            <textarea name="config_file" id="config_file" rows="30" cols="50" placeholder="Nhập file config"></textarea>
+            <textarea name="config_file" id="config_file" rows="30" cols="50" placeholder="Nhập file config" ></textarea>
             </span>
         </div>
         <div>
-            <form id="schedule" action="javascript:add()">
-                <select name="time_set_type" for="time_set" id="time_set_type">
-                    <option value="EVD" name="EVD">Thời gian thực thi hàng ngày(h)</option>
-                    <option value="EVT" name="EVT">Khoảng thời gian thực thi(s)</option>
-                </select>
-                <input type="number" id="time_set"><span>
-                <button value="+" id="add">+</button>
+            <select name="type" for="time_set" id="type">
+                <option value="EVD" name="EVD">Thời gian thực thi hàng ngày(h)</option>
+                <option value="EVT" name="EVT">Khoảng thời gian thực thi(s)</option>
+            </select>
+            <input type="text" id="time_set" name="time_set">
+            <input id="time_set_hidden" name="time_set_hidden" value='{"EVT":[], "EVD":[]}'>
+            <span>
+                <button value="+" id="add" onclick="javascript:add();">+</button>
             </span>
-            </form>
         </div>
-        <button type="submit">Lưu</button>
+        <button type="submit" onclick="javascript:saveForm();">Lưu</button>
     </form>
 </div>
 </body>
 </html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    function add(){
+
+        // lấy giá trị của select
+        var type = document.getElementById("type").value;
+
+        // Lấy data đã lưu trước
+        time_set_hidden  = document.getElementById("time_set_hidden").value;
+         time_set_hidden_value = JSON.parse(time_set_hidden);
+
+        // lấy giá trị của input
+        var time_set = document.getElementById("time_set").value;
+        time_set_hidden_value[type].push(time_set);
+        document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
+
+
+     }
+
+    function saveForm(){
+    // lấy giá trị của file config
+        var config_file = document.getElementById("config_file").value;
+    }
+</script>
 <style>
     body {
        padding-top: 50px;
@@ -41,44 +65,5 @@
     label {
         display: flex;
         justify-content: center;
-}
-</style>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script>
-    let time_set_type = [];
-    let time_set = [];
-    var time_set_list = {time_set_type : time_set};
-
-    function add(){
-        // lấy giá trị của select
-        time_set_type = document.getElementById("schedule").querySelector("select").value;
-        // lấy giá trị của input
-        time_set = document.getElementById("time_set").value;
-
-        // tạo mảng lưu các input vào mảng (value) cho key đã chọn trong select
-        // tạo [] lưu giá trị input cho { key: []}
-            //time_set_list["EVD"][] = [];
-            time_set.push(time_set_list.time_set)
     }
-
-    function saveForm(){
-        var config_file = document.getElementById("config_file").value;
-       alert(
-            "time_set_list ====== " + JSON.stringify(time_set_list) + "config_file ====== " + config_file
-          );
-        $.ajax({
-            method: "POST",
-            url: "/schedule",
-            contentType: "application/json",
-            data: JSON.stringify({
-              time_set_list,
-              config_file,
-            }),
-        })
-        .done(function (data){
-            alert("done::" + data)
-            // Tải lại trang
-            location.reload();
-        })
-}
-</script>
+</style>

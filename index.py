@@ -74,16 +74,31 @@ def main():
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
     global data
-    time_set_list = {}
     if request.method == 'POST':
-        data = request.get_json()
-        config_file = data['config_file']
-        time_set_list = data.get('time_set_list')
+        config_file = request.form.get('config_file')
+        typeT = request.form.get('type')
+        time_set = request.form.get('time_set_hidden')
 
+        print("config file ==111==> ", config_file)
+        print("time_set_hidden  ====222======= ", time_set)
+        print("type ===333===  ", typeT)
+
+        data = {
+            'config_file': config_file,
+            'time_set': time_set
+        }
+        data_str = json.dumps(data)
+        print("======>", data_str)
+
+        # data = {
+        #     'config_file': config_file,
+        #     'time_set': time_set_list
+        # }
+        # data_str = json.dumps(data)
+        # print("data_str 3===> ", data_str)
 
 
         # xử lý mảng trả về từ javascript (hàm to_json chuyển đổi mảng thành chuỗi json)
-        print(type(time_set_list), " =========== type time_set_list")
 
         # if time_set_list.get("") == "EVD":
         #     v = evd(time_set_list, main)
