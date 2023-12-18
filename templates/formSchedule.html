@@ -9,19 +9,26 @@
     <h1>Form đăng ký</h1>
     <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center">
        <div>
+            <label>Tên dịch vụ</label><span><input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"></span>
             <label>Config </label> <span>
             <textarea name="config_file" id="config_file" rows="40" cols="80" placeholder="Nhập file config" ></textarea>
-            </span>
+            </span><br>
+
         </div>
         <div>
             <select id="selectTag" for="time_set">
                 <option value="EVD" name="EVD">Thời gian thực thi hàng ngày(h)</option>
                 <option value="EVT" name="EVT">Khoảng thời gian thực thi(s)</option>
             </select>
-            <input type="text" id="time_set" name="time_set">
+
+            <input id="time_set" name="time_set">
+            <div id="inputs"></div>
             <input id="time_set_hidden" name="time_set_hidden" value='{"EVT":[], "EVD":[]}' hidden="hidden">
             <span>
-            <input type="button" value="+" onclick="add()">
+            <input id="add_input" type="button" value="+" onclick="add()">
+            </span>
+             <span>
+            <input id="remove_input" type="button" value="-" onclick="remove_input()">
             </span>
         </div>
         <button type="submit" onclick="add();">Lưu</button>
@@ -31,6 +38,12 @@
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
+    function remove_input() {
+        const selectedInput = document.querySelector("input:checked");
+        if (selectedInput) {
+            document.getElementById("inputs").removeChild(selectedInput);
+        }
+
     function add() {
         // lấy giá trị của select
         var selectValue = document.getElementById("selectTag").value;
@@ -47,7 +60,27 @@
         }
 
         document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
-        document.getElementById("time_set").value = "";
+
+        var input = document.createElement("input");
+        if(selectValue === "EVD"){
+            input.type = "time";
+            input.name = time_set;
+            input.placeholder = "Thời gian thực thi hàng ngày (giờ : phút : giây)";
+            return input;
+        }else{
+             input.type = "number";
+            input.name = time_set;
+            input.placeholder = "Khoảng thời gian thực thi (giây)";
+            return input;
+        }
+        document.getElementById("inputs").appendChild(input);
+
+        document.getElementById("add-input").addEventListener("click", function() {
+            inputs.push(createInput());
+            document.querySelector("form").appendChild(inputs[inputs.length - 1]);
+        });
+
+         document.getElementById("time_set").value = "";
      }
 </script>
 <style>

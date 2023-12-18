@@ -40,7 +40,7 @@ def read_json_file(json_file):
                 # lấy file_path của _file và check exists
                 if k == "_file":
                     file_path = get_path(str(v))
-                    print("file_path:::::::::::::", file_path)
+                    # print("file_path:::::::::::::", file_path)
                     #     Kiểm tra file có tồn tại hay không?
                     if os.path.exists(file_path):
                         print("The file exists.")
@@ -73,7 +73,7 @@ def read_json_file(json_file):
         # Ghi dữ liệu của "_" vào file myVal.txt
         with open("myVal.txt", "w") as saveV:
             json.dump(globalVal, saveV)
-
+    print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
@@ -82,10 +82,10 @@ def form_schedule():
         config_file_request = request.form.get('config_file')
         time_set_request = request.form.get('time_set_hidden')
         # print("time_set_request type == 111 ==> ", type(time_set_request))
-        print("config file  ==============>>>> ", config_file_request)
+        # print("config file  ==============>>>> ", config_file_request)
 
         time_set = json.loads(time_set_request)
-        # print(" time_set =================== ", time_set)
+        print(" time_set =================== ", time_set)
 
         # lưu file config thành file.json
         if type(config_file_request) == str:
@@ -102,13 +102,13 @@ def form_schedule():
         with open("config_file.json", "w", newline="") as c:
             c.write(config_file_request)
 
-        for k in time_set.keys():
-            if k == 'EVD' and time_set[k] != []:
-                print("==== EVD ======", time_set[k])
-                evd(time_set[k], read_json_file("config_file.json"))
-            if k == 'EVT' and time_set[k] != []:
-                print("==== EVT ======", time_set[k])
-                evt(time_set[k], read_json_file("config_file.json"))
+        # for k in time_set.keys():
+        #     if k == 'EVD' and time_set[k] != []:
+        #         print("==== EVD ======", time_set[k])
+        #         evd(time_set['EVD'], read_json_file("config_file.json"))
+        #     if k == 'EVT' and time_set[k] != []:
+        #         print("==== EVT ======", time_set[k])
+        #         evt(time_set['EVT'], read_json_file("config_file.json"))
 
         # Ghi dữ liệu của "_" vào file myVal.txt
         # with open("result.txt", "w") as saveV:
