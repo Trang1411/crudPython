@@ -82,14 +82,25 @@ def form_schedule():
         config_file_request = request.form.get('config_file')
         time_set_request = request.form.get('time_set_hidden')
         # print("time_set_request type == 111 ==> ", type(time_set_request))
-        print("config file type ==============>>>> ", type(config_file_request))
+        print("config file  ==============>>>> ", config_file_request)
 
         time_set = json.loads(time_set_request)
         # print(" time_set =================== ", time_set)
 
         # lưu file config thành file.json
-        with open("config_file.json", "w", encoding="utf-8") as c:
-            json.dump(config_file_request, c)
+        if type(config_file_request) == str:
+        # ghi dẽ liệu JSON vào tệp
+            with open("config_file.json", "w", encoding="utf-8") as c:
+                c.write(config_file_request)
+        else:
+            # chuyển đổi dư liệu JSON thành chuỗi
+            config_file_request_str = str(config_file_request)
+            # ghi dữ liệu vào tệp
+            with open("config_file.json", "w") as c:
+                c.write(config_file_request_str)
+        # Đặt tham số newline thành None
+        with open("config_file.json", "w", newline="") as c:
+            c.write(config_file_request)
 
         for k in time_set.keys():
             if k == 'EVD' and time_set[k] != []:
