@@ -49,19 +49,19 @@ def get_path(filename):
 
 # Hàm schedule.run_pending() kiểm tra xem thời gian thực hiện của tác vụ đầu tiên trong hàng đợi đã đến hay chưa.
     # Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
-def evd(time_list, main):
+def evd(time_list, read_json_file):
     global time
     for time in time_list:
-        schedule.every().day.at(time).do(main)
+        schedule.every().day.at(time).do(read_json_file)
     while True:
         schedule.run_pending()
         time.sleep(1)
 
 
-def evt(time_list, main):
+def evt(time_list, read_json_file):
     global time
     for time in time_list:
-        schedule.every(time).minutes.do(main)
+        schedule.every(time).minutes.do(read_json_file)
     while True:
         schedule.run_pending()
         time.sleep(1)

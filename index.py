@@ -10,17 +10,20 @@ from lib import (_get, _put, _post, _upload_file,
 app = Flask(__name__)
 
 
-def main():
+def read_json_file(json_file):
     global file_path
     globalVal = {}
     # Đọc file json
-    with open("tempJson.json", "r", encoding='utf-8') as file:
-        data = json.load(file)
+    with open(json_file, "r", encoding='utf-8') as file:
+        data_file_json = json.load(file)
 
-    # img = {}
+    # print("======================> ", type(data_file_json))
+    # print("======================>> ", data_file_json)
+
     # Lấy dữ liệu của "_" trong mỗi json và lưu vào globalVal
-    for item in data:
-        # Lấy từng thành phần trong mỗi item json
+    for item in data_file_json:
+        print("=====>>>>>> item: ", item)
+        # Lấy dữ liệu của mỗi mục trong json
         body = item.get("body")
         headers = item.get("headers")
         url = item.get("url")
@@ -71,35 +74,39 @@ def main():
         with open("myVal.txt", "w") as saveV:
             json.dump(globalVal, saveV)
 
+
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
     global data
-    time_set_list = {}
     if request.method == 'POST':
-        data = request.get_json()
-        config_file = data['config_file']
-        time_set_list = data.get('time_set_list')
+        config_file_request = request.form.get('config_file')
+        time_set_request = request.form.get('time_set_hidden')
+        # print("time_set_request type == 111 ==> ", type(time_set_request))
+        print("config file type ==============>>>> ", type(config_file_request))
 
+        time_set = json.loads(time_set_request)
+        # print(" time_set =================== ", time_set)
 
+        # lưu file config thành file.json
+        with open("config_file.json", "w", encoding="utf-8") as c:
+            json.dump(config_file_request, c)
 
-        # xử lý mảng trả về từ javascript (hàm to_json chuyển đổi mảng thành chuỗi json)
-        print(type(time_set_list), " =========== type time_set_list")
-
-        # if time_set_list.get("") == "EVD":
-        #     v = evd(time_set_list, main)
-        # else:
-        #     v = evt(time_set_list, main)
-        # data = {config_file, time_set_list}
+        for k in time_set.keys():
+            if k == 'EVD' and time_set[k] != []:
+                print("==== EVD ======", time_set[k])
+                evd(time_set[k], read_json_file("config_file.json"))
+            if k == 'EVT' and time_set[k] != []:
+                print("==== EVT ======", time_set[k])
+                evt(time_set[k], read_json_file("config_file.json"))
 
         # Ghi dữ liệu của "_" vào file myVal.txt
         # with open("result.txt", "w") as saveV:
         #     json.dump(data, saveV)
-    # return "success!!!!!"
     return render_template("formSchedule.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
     SECRET_KEY = os.urandom(32)
     app.config['SECRET_KEY'] = SECRET_KEY
     app.secret_key = SECRET_KEY
-    # main()
