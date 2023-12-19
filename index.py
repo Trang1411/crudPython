@@ -79,6 +79,7 @@ def read_json_file(json_file):
 def form_schedule():
     global data
     if request.method == 'POST':
+        service_name = request.form.get('service_name')
         config_file_request = request.form.get('config_file')
         time_set_request = request.form.get('time_set_hidden')
         # print("time_set_request type == 111 ==> ", type(time_set_request))

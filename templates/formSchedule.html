@@ -1,99 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <title>Form Schedule</title>
 </head>
 <body>
 <div>
     <h1>Form đăng ký</h1>
     <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center">
-       <div>
-            <label>Tên dịch vụ</label><span><input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"></span>
-            <label>Config </label> <span>
-            <textarea name="config_file" id="config_file" rows="40" cols="80" placeholder="Nhập file config" ></textarea>
-            </span><br>
-
+        <div>
+            <label >Tên dịch vụ</label>
+            <span>
+            <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"
+                   style="width: 380px"/>
+          </span>
+            <label> Config </label>
+            <span>
+            <textarea name="config_file" id="config_file" rows="30" cols="50" placeholder="Nhập file config"></textarea>
+          </span>
         </div>
         <div>
             <select id="selectTag" for="time_set">
-                <option value="EVD" name="EVD">Thời gian thực thi hàng ngày(h)</option>
+                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày(h)</option>
                 <option value="EVT" name="EVT">Khoảng thời gian thực thi(s)</option>
             </select>
-
-            <input id="time_set" name="time_set">
-            <div id="inputs"></div>
-            <input id="time_set_hidden" name="time_set_hidden" value='{"EVT":[], "EVD":[]}' hidden="hidden">
+            <input type="text" id="time_set" name="time_set"/>
+            <input id="time_set_hidden" name="time_set_hidden" value='{"EVT":[], "EVD":[]}' hidden="hidden"/>
             <span>
-            <input id="add_input" type="button" value="+" onclick="add()">
-            </span>
-             <span>
-            <input id="remove_input" type="button" value="-" onclick="remove_input()">
-            </span>
+            <input type="button" value="+" onclick="add()"/>
+          </span>
         </div>
-        <button type="submit" onclick="add();">Lưu</button>
+        <div style="padding-top: 30px;">
+            <button type="submit" onclick="add()">Lưu</button>
+        </div>
     </form>
+    <div>
+        <label>
+            <table id="dataTable" style="text-align: left;">
+                <tr>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </table>
+        </label>
+
+    </div>
 </div>
 </body>
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    function remove_input() {
-        const selectedInput = document.querySelector("input:checked");
-        if (selectedInput) {
-            document.getElementById("inputs").removeChild(selectedInput);
-        }
-
     function add() {
-        // lấy giá trị của select
-        var selectValue = document.getElementById("selectTag").value;
+      // lấy giá trị của select
+      var selectValue = document.getElementById("selectTag").value;
 
-        // Lấy data đã lưu trước
-        time_set_hidden = document.getElementById("time_set_hidden").value;
-        time_set_hidden_value = JSON.parse(time_set_hidden);
+      // Lấy data đã lưu trước
+      time_set_hidden = document.getElementById("time_set_hidden").value;
+      time_set_hidden_value = JSON.parse(time_set_hidden);
 
-        // lấy giá trị của input
-        var time_set = document.getElementById("time_set").value.trim();
+      // lấy giá trị của input
+      var time_set = document.getElementById("time_set").value;
+      if (time_set !== "") {
+        time_set_hidden_value[selectValue].push(time_set);
+      }
+      document.getElementById("time_set_hidden").value = JSON.stringify(
+        time_set_hidden_value
+      );
+      document.getElementById("time_set").value = "";
 
-        if (time_set !== ""){
-            time_set_hidden_value[selectValue].push(time_set);
+      var dataTable = document.getElementById("dataTable");
+
+      // Clear existing rows
+      dataTable.innerHTML = "<tr><th></th><th></th><th></th></tr>";
+
+      // Thêm dòng mới trong bảng sau khi +
+      for (var label in time_set_hidden_value) {
+        for (var i = 0; i < time_set_hidden_value[label].length; i++) {
+          var row = dataTable.insertRow();
+          var cell1 = row.insertCell(0);
+          var cell2 = row.insertCell(1);
+          var cell3 = row.insertCell(2);
+          if(label === "EVD"){
+            cell1.innerHTML = "Thời gian thực thi trong ngày (giờ:phút:giây)";
+          }else{
+             cell1.innerHTML = "Khoảng thời gian giữa 2 lần thực thi (giây)";
+          }
+          cell2.innerHTML = time_set_hidden_value[label][i];
+
+          // Thêm nút xóa ở mỗi dòng trong bảng
+          var deleteButton = document.createElement("button");
+          deleteButton.innerHTML = "-";
+          deleteButton.onclick = function () {
+            deleteRow(this);
+          };
+          cell3.appendChild(deleteButton);
         }
+      }
+    }
+    function deleteRow(button) {
+      var row = button.parentNode.parentNode;
+      var label = row.cells[0].innerHTML;
+      var value = row.cells[1].innerHTML;
 
-        document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
+      // Xóa dòng trong bảng khi click -
+      row.parentNode.removeChild(row);
 
-        var input = document.createElement("input");
-        if(selectValue === "EVD"){
-            input.type = "time";
-            input.name = time_set;
-            input.placeholder = "Thời gian thực thi hàng ngày (giờ : phút : giây)";
-            return input;
-        }else{
-             input.type = "number";
-            input.name = time_set;
-            input.placeholder = "Khoảng thời gian thực thi (giây)";
-            return input;
-        }
-        document.getElementById("inputs").appendChild(input);
-
-        document.getElementById("add-input").addEventListener("click", function() {
-            inputs.push(createInput());
-            document.querySelector("form").appendChild(inputs[inputs.length - 1]);
-        });
-
-         document.getElementById("time_set").value = "";
-     }
+      // Xóa dữ liệu trong time_set_hidden_value khi -
+      var index = time_set_hidden_value[label].indexOf(value);
+      if (index !== -1) {
+        time_set_hidden_value[label].splice(index, 1);
+        document.getElementById("time_set_hidden").value = JSON.stringify(
+          time_set_hidden_value
+        );
+      }
+    }
 </script>
 <style>
     body {
-       padding-top: 50px;
-       text-align: center;
-       background-color: lightblue;
-       color: darkblue;
-       width: auto, auto;
-       front-size: 18
-   }
+         padding-top: 50px;
+         text-align: center;
+         background-color: lightblue;
+         color: darkblue;
+         width: auto, auto;
+         front-size: 18;
+         margin: auto;
+         padding: auto;
+    }
     label {
         display: flex;
         justify-content: center;
+        margin: auto;
+        padding: auto;
     }
+
+    table{
+        vertical-align: middle;
+        border-top:1px solid #ccc;
+        border-bottom:1px solid #ccc;
+        border-collapse:collapse;
+        width: 420px;
+        margin: 20px;
+        padding: 15px;
+}
 </style>
