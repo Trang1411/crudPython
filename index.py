@@ -81,11 +81,11 @@ def form_schedule():
     if request.method == 'POST':
         service_name = request.form.get('service_name')
         config_file_request = request.form.get('config_file')
-        time_set_request = request.form.get('time_set_hidden')
+        time_set = request.form.getlist('time_set')
         # print("time_set_request type == 111 ==> ", type(time_set_request))
         # print("config file  ==============>>>> ", config_file_request)
 
-        time_set = json.loads(time_set_request)
+        # time_set = json.loads(time_set_request)
         print(" time_set =================== ", time_set)
 
         # lưu file config thành file.json

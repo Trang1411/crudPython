@@ -9,7 +9,7 @@
     <h1>Form đăng ký</h1>
     <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center">
         <div>
-            <label >Tên dịch vụ</label>
+            <label>Tên dịch vụ</label>
             <span>
             <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"
                    style="width: 380px"/>
@@ -22,9 +22,9 @@
         <div>
             <select id="selectTag" for="time_set">
                 <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (HH:mm:ss)</option>
-                <option value="EVT" name="EVT">Khoảng thời gian thực thi(s)</option>
+                <option value="EVT" name="EVT">Khoảng thời gian thực thi (s)</option>
             </select>
-            <input type="text" id="time_set" name="time_set" class="invalid "/>
+            <input type="text" id="time_set" name="time_set" class="invalid"/>
             <input id="time_set_hidden" name="time_set_hidden" value='{"EVT":[], "EVD":[]}' hidden="hidden"/>
             <span>
             <input type="button" value="+" onclick="add()"/>
@@ -49,58 +49,70 @@
 </body>
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
 <script>
     function add() {
-      // lấy giá trị của select
-      var select_value = document.getElementById("selectTag").value;
+        // lấy giá trị của select
+        var select_value = document.getElementById("selectTag").value;
 
-      // Lấy data đã lưu trước
-      time_set_hidden = document.getElementById("time_set_hidden").value;
-      time_set_hidden_value = JSON.parse(time_set_hidden);
+        // Lấy data đã lưu trước
+        //time_set_hidden = document.getElementById("time_set_hidden").value;
+        //time_set_hidden_value = JSON.parse(time_set_hidden);
 
-      var input_time_set = document.getElementById("time_set");
-      // lấy giá trị của input
-      var time_set = document.getElementById("time_set").value;
+        var input_time_set = document.getElementById("time_set");
+        // lấy giá trị của input
+        var time_set_value = document.getElementById("time_set").value;
 
-      // check validate type input time_set
-      if (time_set !== "") {
+        //check trc khi push
+        check_input_format (select_value, time_set_value);
 
-        time_set_hidden_value[select_value].push(time_set);
-      }
-      document.getElementById("time_set_hidden").value = JSON.stringify(
-        time_set_hidden_value
-      );
-      document.getElementById("time_set").value = "";
-
-      var dataTable = document.getElementById("dataTable");
-
-      // Clear existing rows
-      dataTable.innerHTML = "<tr><th></th><th></th><th></th></tr>";
-
-      // Thêm dòng mới trong bảng sau khi click "+"
-      for (var label in time_set_hidden_value) {
-        for (var i = 0; i < time_set_hidden_value[label].length; i++) {
-          var row = dataTable.insertRow();
-          var cell1 = row.insertCell(0);
-          var cell2 = row.insertCell(1);
-          var cell3 = row.insertCell(2);
-          if(label === "EVD"){
-            cell1.innerHTML = "Thời gian thực thi trong ngày (HH:mm:ss)";
-          }else{
-             cell1.innerHTML = "Khoảng thời gian giữa 2 lần thực thi (s)";
-          }
-          cell2.innerHTML = time_set_hidden_value[label][i];
-
-          // Thêm nút xóa ở mỗi dòng trong bảng
-          var deleteButton = document.createElement("button");
-          deleteButton.innerHTML = "-";
-          deleteButton.onclick = function () {
-            deleteRow(this);
-          };
-          cell3.appendChild(deleteButton);
+        // tạo biến lưu trữ data input
+        var time_data = {"EVT":[], "EVD":[]};
+        // Duyệt qua các key của mảng
+        for (var key in time_data) {
+             if (time_set_value !== "" && select_value === key) {
+                // Thêm giá trị vào mảng tương ứng
+                time_data[key].push(time_set_value);
+            }
         }
-      }
+          //document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
+        console.log(time_data);
+
+        // Đặt giá trị input về rỗng sau khi kiểm tra
+        document.getElementById("time_set").value = "";
+
+        var dataTable = document.getElementById("dataTable");
+
+        // Clear existing rows
+        dataTable.innerHTML = "<tr><th></th><th></th><th></th></tr>";
+
+        // Thêm dòng mới trong bảng sau khi click "+"
+          for (var label in time_data) {
+            for (var i = 0; i < time_data[label].length; i++) {
+              var row = dataTable.insertRow();
+              var cell1 = row.insertCell(0);
+              var cell2 = row.insertCell(1);
+              var cell3 = row.insertCell(2);
+              if(label === "EVD"){
+                cell1.innerHTML = "Thời gian thực thi trong ngày (HH:mm:ss)";
+                cell2.innerHTML = time_data["EVD"][i];
+              }else{
+                 cell1.innerHTML = "Khoảng thời gian giữa 2 lần thực thi (s)";
+                 cell2.innerHTML = time_data["EVT"][i];
+              }
+
+
+              // Thêm nút xóa ở mỗi dòng trong bảng
+              var deleteButton = document.createElement("button");
+              deleteButton.innerHTML = "-";
+              deleteButton.onclick = function () {
+                deleteRow(this);
+              };
+              cell3.appendChild(deleteButton);
+            }
+          }
     }
+
     function deleteRow(button) {
       var row = button.parentNode.parentNode;
       var label = row.cells[0].innerHTML;
@@ -113,30 +125,33 @@
       var index = time_set_hidden_value[label].indexOf(value);
       if (index !== -1) {
         time_set_hidden_value[label].splice(index, 1);
-        document.getElementById("time_set_hidden").value = JSON.stringify(
-          time_set_hidden_value
-        );
+        document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
       }
     }
 
     function check_input_format (select_value, time_set_value) {
         var input_time_set = document.getElementById("time_set");
-        input_time_set.addEventListener("change", () => {
-            var isHHmm = moment(time_set, "HH:mm");
-            var isInteger = !isNaN(time_set) && time_set > 0;
-            if ((select_value === "EVD" && !isHHmm.isValid()) || (select_value === "EVT" && !isInteger)) {
-                input_time_set.classList.add("invalid");
+        var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
+        var isInteger = !isNaN(time_set_value) && time_set_value > 0;
+        if ((select_value === "EVD" && !is_HH_mm_ss.isValid()) || (select_value === "EVT" && !isInteger)) {
+            input_time_set.classList.add("invalid");
+            console.log("Giá 000 trị hợp lệ");
 
-                // Hiển thị thông báo lỗi
-                const errorElement = document.createElement("span");
-                errorElement.textContent = "Dữ liệu đầu vào không hợp lệ";
-                errorElement.classList.add("error");
-                input_time_set.after(errorElement);
-            }else {
-                // Dữ liệu đầu vào hợp lệ
-                input_time_set.classList.remove("invalid");
-            }
+            // Hiển thị thông báo lỗi
+            const errorElement = document.createElement("span");
+            errorElement.textContent = "Dữ liệu đầu vào không hợp lệ";
+            errorElement.classList.add("error");
+            input_time_set.after(errorElement);
+        }
+
+        if ((select_value === "EVD" && is_HH_mm_ss.isValid()) || (select_value === "EVT" && isInteger)){
+            // Dữ liệu đầu vào hợp lệ
+            console.log("Giá trị hợp lệ");
+            input_time_set.classList.remove("invalid");
+            //time_set_hidden_value[select_value].push(time_set_value);
+        }
     }
+
 </script>
 <style>
     body {
@@ -158,8 +173,6 @@
 
     table{
         vertical-align: middle;
-        border-top:1px solid #ccc;
-        border-bottom:1px solid #ccc;
         border-collapse:collapse;
         width: 420px;
         margin: 20px;
