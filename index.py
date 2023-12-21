@@ -81,18 +81,30 @@ def form_schedule():
     if request.method == 'POST':
         service_name = request.form.get('service_name')
         config_file_request = request.form.get('config_file')
-        time_set = request.form.getlist('time_set')
+        time_set = request.form.getlist('time_set_hidden')
         # print("time_set_request type == 111 ==> ", type(time_set_request))
         # print("config file  ==============>>>> ", config_file_request)
 
         # time_set = json.loads(time_set_request)
         print(" time_set =================== ", time_set)
 
+        data = {
+            "service_name": service_name,
+            "config_file": config_file_request,
+            "time_set": json.dumps(time_set)
+        }
+
+        data_json = json.dumps(data)
+
+        print("-----data----- ", data)
+
         # lưu file config thành file.json
-        if type(config_file_request) == str:
+        if type(data_json) == str:
         # ghi dẽ liệu JSON vào tệp
-            with open("config_file.json", "w", encoding="utf-8") as c:
-                c.write(config_file_request)
+            file_name = service_name + ".json"
+            print("file name ======== ", file_name)
+            with open(file_name, "w", encoding="utf-8") as c:
+                c.write(data_json)
         else:
             # chuyển đổi dư liệu JSON thành chuỗi
             config_file_request_str = str(config_file_request)

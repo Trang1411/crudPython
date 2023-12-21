@@ -12,14 +12,14 @@
             <label>Tên dịch vụ</label>
             <span>
             <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"
-                   style="width: 380px"/>
+                   style="width: 380px" required/>
           </span>
             <label> Config </label>
             <span>
             <textarea name="config_file" id="config_file" rows="30" cols="50" placeholder="Nhập file config"></textarea>
           </span>
         </div>
-        <div>
+        <div class="selectTag">
             <select id="selectTag" for="time_set">
                 <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (HH:mm:ss)</option>
                 <option value="EVT" name="EVT">Khoảng thời gian thực thi (s)</option>
@@ -36,7 +36,7 @@
     </form>
     <div>
         <label>
-            <table id="dataTable" style="text-align: left;">
+            <table id="dataTable" style="text-align: left; width: 800px">
                 <tr>
                     <th></th>
                     <th></th>
@@ -51,32 +51,48 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
 <script>
+    var evd = [];
+    var evt = [];
     function add() {
         // lấy giá trị của select
         var select_value = document.getElementById("selectTag").value;
 
         // Lấy data đã lưu trước
-        //time_set_hidden = document.getElementById("time_set_hidden").value;
-        //time_set_hidden_value = JSON.parse(time_set_hidden);
+        time_set_hidden = document.getElementById("time_set_hidden").value;
+        time_set_hidden_value = JSON.parse(time_set_hidden);
 
         var input_time_set = document.getElementById("time_set");
         // lấy giá trị của input
         var time_set_value = document.getElementById("time_set").value;
 
         //check trc khi push
-        check_input_format (select_value, time_set_value);
+        time_set_value =  check_input_format (select_value, time_set_value);
 
-        // tạo biến lưu trữ data input
-        var time_data = {"EVT":[], "EVD":[]};
         // Duyệt qua các key của mảng
-        for (var key in time_data) {
-             if (time_set_value !== "" && select_value === key) {
+        for (var key in time_set_hidden_value) {
+             if (time_set_value !== false && select_value === key) {
                 // Thêm giá trị vào mảng tương ứng
-                time_data[key].push(time_set_value);
-            }
+                time_set_hidden_value[key].push(time_set_value);
+                for (var i = 0; i < time_set_hidden_value[key].length; i++){
+                    var obj = {
+                        "id": i,
+                        "value": time_set_hidden_value[key][i]
+                    };
+                    if(key === "EVD"){
+                        evd.push(obj);
+                    } else {
+                        evt.push(obj);
+                    }
+                }
+             }
         }
-          //document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
-        console.log(time_data);
+
+
+        if(select_value === "EVT")
+
+        console.log("time_set_hidden_value ===== " + time_set_hidden_value)
+
+        document.getElementById("time_set_hidden").value = JSON.stringify(time_set_hidden_value);
 
         // Đặt giá trị input về rỗng sau khi kiểm tra
         document.getElementById("time_set").value = "";
@@ -87,18 +103,20 @@
         dataTable.innerHTML = "<tr><th></th><th></th><th></th></tr>";
 
         // Thêm dòng mới trong bảng sau khi click "+"
-          for (var label in time_data) {
-            for (var i = 0; i < time_data[label].length; i++) {
+          for (var label in time_set_hidden_value) {
+            for (var i = 0; i < time_set_hidden_value[label].length; i++) {
               var row = dataTable.insertRow();
               var cell1 = row.insertCell(0);
               var cell2 = row.insertCell(1);
               var cell3 = row.insertCell(2);
               if(label === "EVD"){
-                cell1.innerHTML = "Thời gian thực thi trong ngày (HH:mm:ss)";
-                cell2.innerHTML = time_data["EVD"][i];
+                if(!moment(time_set_hidden_value["EVD"][i]).isValid()){
+                  cell1.innerHTML = "Thời gian thực thi trong ngày (HH:mm:ss)";
+                }
+                cell2.innerHTML = time_set_hidden_value["EVD"][i];
               }else{
                  cell1.innerHTML = "Khoảng thời gian giữa 2 lần thực thi (s)";
-                 cell2.innerHTML = time_data["EVT"][i];
+                 cell2.innerHTML = time_set_hidden_value["EVT"][i];
               }
 
 
@@ -133,22 +151,19 @@
         var input_time_set = document.getElementById("time_set");
         var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
         var isInteger = !isNaN(time_set_value) && time_set_value > 0;
-        if ((select_value === "EVD" && !is_HH_mm_ss.isValid()) || (select_value === "EVT" && !isInteger)) {
-            input_time_set.classList.add("invalid");
-            console.log("Giá 000 trị hợp lệ");
 
-            // Hiển thị thông báo lỗi
-            const errorElement = document.createElement("span");
-            errorElement.textContent = "Dữ liệu đầu vào không hợp lệ";
-            errorElement.classList.add("error");
-            input_time_set.after(errorElement);
-        }
-
-        if ((select_value === "EVD" && is_HH_mm_ss.isValid()) || (select_value === "EVT" && isInteger)){
+        if(!isInteger || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
+            input_time_set.setCustomValidity("Dữ liệu đầu vào không hợp lệ");
+            console.log("Giá 0000 trị hợp lệ");
+             return false;
+        }else{
             // Dữ liệu đầu vào hợp lệ
             console.log("Giá trị hợp lệ");
-            input_time_set.classList.remove("invalid");
-            //time_set_hidden_value[select_value].push(time_set_value);
+            if(select_value === "EVD"){
+              return is_HH_mm_ss.subtract(1,'days').format('HH:mm:ss')
+            }else{
+              return time_set_value;
+            }
         }
     }
 
