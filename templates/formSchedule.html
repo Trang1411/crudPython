@@ -155,13 +155,10 @@
     }
 
     function save(){
-      console.log("==== check function save() =====")
-
       var time_set_value = document.getElementById("time_set").value;
       if(time_set_value !== ""){
             add(); // Thêm dữ liệu mới vào mảng trước khi lưu
       }
-
       document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
       // Gửi form để lưu dữ liệu
       document.forms[0].submit();
