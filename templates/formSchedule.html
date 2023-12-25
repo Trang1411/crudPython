@@ -12,11 +12,11 @@
             <label>Tên dịch vụ</label>
             <span>
             <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"
-                   style="width: 380px" required/>
+                   style="width: 468px" required/>
           </span>
             <label> Config </label>
             <span>
-            <textarea name="config_file" id="config_file" rows="30" cols="50" placeholder="Nhập file config"></textarea>
+            <textarea name="config_file" id="config_file" rows="36" cols="62" placeholder="Nhập file config"></textarea>
           </span>
         </div>
         <div class="selectTag">
@@ -104,34 +104,37 @@
                 var deleteButton = document.createElement("button");
                 deleteButton.innerHTML = "-";
                 deleteButton.onclick = function () {
-                  deleteRow(this);
+                  deleteRow(this, event);
                 };
                 cell3.appendChild(deleteButton);
             }
         }
     }
 
-    function deleteRow(button) {
-        var row = button.parentNode.parentNode;
-        var label = row.cells[0].innerHTML;
-        var value = row.cells[1].innerHTML;
+    function deleteRow(button, event) {
+        // Check if the pointerType is not an empty string before proceeding
+        if (event.pointerType !== "") {
+            event.stopPropagation(); // Prevent the event from bubbling up
+            var row = button.parentNode.parentNode;
+            var label = row.cells[0].innerHTML;
+            var value = row.cells[1].innerHTML;
 
-        console.log("key-value muốn delete ===>> " + label + " - " + value);
+            console.log("key-value muốn delete ===>> " + label + " - " + value);
 
-       // xóa phần tử trong mảng khi -
-        if ("Thời gian thực thi trong ngày (HH:mm:ss)" === label){
-            var index = arr_data["EVD"].indexOf(value);
-            console.log("xóa ở EVD ... ===> " + arr_data["EVD"])
-            arr_data["EVD"].splice(index, 1);
-        }else{
-            console.log(" xóa ở EVT ... ===> " + arr_data["EVT"])
-            var index = arr_data["EVT"].indexOf(value);
-            arr_data["EVT"].splice(index, 1);
+           // xóa phần tử trong mảng khi -
+            if ("Thời gian thực thi trong ngày (HH:mm:ss)" === label){
+                var index = arr_data["EVD"].indexOf(value);
+                console.log("xóa ở EVD ... ===> " + arr_data["EVD"])
+                arr_data["EVD"].splice(index, 1);
+            }else{
+                console.log(" xóa ở EVT ... ===> " + arr_data["EVT"])
+                var index = arr_data["EVT"].indexOf(value);
+                arr_data["EVT"].splice(index, 1);
+            }
+
+          // Xóa dòng trong bảng khi click -
+            row.parentNode.removeChild(row);
         }
-
-      // Xóa dòng trong bảng khi click -
-        row.parentNode.removeChild(row);
-
     }
 
     function check_input_format (select_value, time_set_value) {

@@ -2,6 +2,7 @@ import glob
 
 import requests
 import schedule
+import time
 
 
 def _post(url, headers, body):
@@ -50,18 +51,16 @@ def get_path(filename):
 # Hàm schedule.run_pending() kiểm tra xem thời gian thực hiện của tác vụ đầu tiên trong hàng đợi đã đến hay chưa.
     # Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
 def evd(time_list, read_json_file):
-    global time
-    for time in time_list:
-        schedule.every().day.at(time).do(read_json_file)
+    for schedule_time in time_list:
+        schedule.every().day.at(schedule_time).do(lambda: read_json_file("file_name"))
     while True:
         schedule.run_pending()
         time.sleep(1)
 
 
 def evt(time_list, read_json_file):
-    global time
-    for time in time_list:
-        schedule.every(time).minutes.do(read_json_file)
+    for schedule_time in time_list:
+        schedule.every(int(schedule_time)).minutes.do(lambda: read_json_file("file_name"))
     while True:
         schedule.run_pending()
         time.sleep(1)

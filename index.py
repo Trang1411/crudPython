@@ -1,6 +1,5 @@
 import json
 import os
-import array as arr
 
 from flask import Flask, render_template, request, jsonify
 
@@ -14,14 +13,21 @@ def read_json_file(json_file):
     global file_path
     globalVal = {}
     # Đọc file json
-    with open(json_file, "r", encoding='utf-8') as file:
+    print("000000000000000000000000", json_file)
+    path = os.path.join("botData", json_file)
+    with open(path, "r") as file:
         data_file_json = json.load(file)
 
     # print("======================> ", type(data_file_json))
     # print("======================>> ", data_file_json)
-
     # Lấy dữ liệu của "_" trong mỗi json và lưu vào globalVal
-    for item in data_file_json:
+    config_file_json = data_file_json["config_file"]
+    print("config_file_json ========== ", config_file_json)
+    # with open(config_file_json, "r", encoding='utd-8') as cf:
+    #     config_file = json.load(cf)
+
+    # print("type config_file ========== ", type(config_file))
+    for item in config_file_json:
         print("=====>>>>>> item: ", item)
         # Lấy dữ liệu của mỗi mục trong json
         body = item.get("body")
@@ -75,53 +81,55 @@ def read_json_file(json_file):
             json.dump(globalVal, saveV)
     print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
+
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
     global data
     if request.method == 'POST':
         service_name = request.form.get('service_name')
         config_file_request = request.form.get('config_file')
-        time_set = request.form.getlist('time_set_hidden')
-        # print("time_set_request type == 111 ==> ", type(time_set_request))
+        time_set = request.form.get('time_set_hidden')
         # print("config file  ==============>>>> ", config_file_request)
 
-        # time_set = json.loads(time_set_request)
-        print(" time_set =================== ", time_set)
+        try:
+            time_set = json.loads(time_set)
+            config_file_dict = json.loads(config_file_request)
+        except json.JSONDecodeError as e:
+            print("Lỗi JSON:", e)
+            return  # Dừng xử lý nếu phát hiện lỗi JSON
 
         data = {
             "service_name": service_name,
-            "config_file": config_file_request,
-            "time_set": json.dumps(time_set)
+            "config_file": config_file_dict,
+            "time_set": time_set
         }
 
-        data_json = json.dumps(data)
-
-        print("-----data----- ", data)
-
         # lưu file config thành file.json
-        if type(data_json) == str:
-        # ghi dẽ liệu JSON vào tệp
-            file_name = service_name + ".json"
-            print("file name ======== ", file_name)
-            with open(file_name, "w", encoding="utf-8") as c:
-                c.write(data_json)
-        else:
-            # chuyển đổi dư liệu JSON thành chuỗi
-            config_file_request_str = str(config_file_request)
-            # ghi dữ liệu vào tệp
-            with open("config_file.json", "w") as c:
-                c.write(config_file_request_str)
-        # Đặt tham số newline thành None
-        with open("config_file.json", "w", newline="") as c:
-            c.write(config_file_request)
+        file_name = service_name + ".json"
+        path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
 
-        # for k in time_set.keys():
-        #     if k == 'EVD' and time_set[k] != []:
-        #         print("==== EVD ======", time_set[k])
-        #         evd(time_set['EVD'], read_json_file("config_file.json"))
-        #     if k == 'EVT' and time_set[k] != []:
-        #         print("==== EVT ======", time_set[k])
-        #         evt(time_set['EVT'], read_json_file("config_file.json"))
+        # Kiểm tra xem thư mục đã tồn tại hay chưa
+        if not os.path.exists("/pyWithJson/botData/"):
+            print("check exists ===== ", os.path.exists("/pyWithJson/botData/"))
+            os.makedirs("/pyWithJson/botData/", exist_ok=True)  # tạo thư mục nếu chưa tồn tại
+
+        # Ghi dữ liệu JSON vào tệp
+        try:
+            with open(path, "w") as f:
+                json.dump(data, f)  # Ghi dữ liệu JSON trực tiếp
+        except Exception as e:
+            print("Lỗi ghi file:", e)
+
+        # Đặt tham số newline thành None
+        # with open(path, "w", newline="") as c:
+        #     c.write(data_json)
+
+        if time_set["EVD"] != []:
+            # print("==== EVD ======", time_set["EVD"])
+            evd(time_set["EVD"], read_json_file(file_name))
+        if time_set["EVT"] != []:
+            print("==== EVT ======", time_set["EVT"])
+            evt(time_set["EVT"], read_json_file(file_name))
 
         # Ghi dữ liệu của "_" vào file myVal.txt
         # with open("result.txt", "w") as saveV:
