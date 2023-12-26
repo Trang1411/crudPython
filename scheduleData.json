@@ -1,0 +1,1 @@
+[{"service_name": "botData\\E.json", "time_set": {"EVD": ["15:00:00"], "EVT": []}}, {"service_name": "botData\\A.json", "time_set": {"EVD": ["06:00:00", "22:00:00"], "EVT": []}}, {"service_name": "botData\\A.json", "time_set": {"EVD": [], "EVT": ["300"]}}, {"service_name": "botData\\B.json", "time_set": {"EVD": ["10:00:00"], "EVT": []}}]
