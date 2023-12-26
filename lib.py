@@ -60,7 +60,7 @@ def evd(time_list, read_json_file):
 
 def evt(time_list, read_json_file):
     for schedule_time in time_list:
-        schedule.every(int(schedule_time)).minutes.do(lambda: read_json_file("file_name"))
+        schedule.every(int(schedule_time)).seconds.do(lambda: read_json_file("file_name"))
     while True:
         schedule.run_pending()
         time.sleep(1)

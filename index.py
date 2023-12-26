@@ -13,7 +13,7 @@ def read_json_file(json_file):
     global file_path
     globalVal = {}
     # Đọc file json
-    print("000000000000000000000000", json_file)
+    print("0000000000000", json_file)
     path = os.path.join("botData", json_file)
     with open(path, "r") as file:
         data_file_json = json.load(file)
@@ -80,6 +80,7 @@ def read_json_file(json_file):
         with open("myVal.txt", "w") as saveV:
             json.dump(globalVal, saveV)
     print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    return
 
 
 @app.route('/schedule', methods=['GET', 'POST'])
