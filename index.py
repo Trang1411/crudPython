@@ -1,5 +1,6 @@
 import json
 import os
+from collections.abc import Set
 
 from flask import Flask, render_template, request, jsonify
 
@@ -82,7 +83,7 @@ def read_json_file(json_file):
     print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     return
 
-
+scheduleData = []
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
     global data
@@ -109,11 +110,6 @@ def form_schedule():
         file_name = service_name + ".json"
         path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
 
-        # Kiểm tra xem thư mục đã tồn tại hay chưa
-        if not os.path.exists("/pyWithJson/botData/"):
-            print("check exists ===== ", os.path.exists("/pyWithJson/botData/"))
-            os.makedirs("/pyWithJson/botData/", exist_ok=True)  # tạo thư mục nếu chưa tồn tại
-
         # Ghi dữ liệu JSON vào tệp
         try:
             with open(path, "w") as f:
@@ -121,22 +117,52 @@ def form_schedule():
         except Exception as e:
             print("Lỗi ghi file:", e)
 
-        # Đặt tham số newline thành None
-        # with open(path, "w", newline="") as c:
-        #     c.write(data_json)
+        # tạo dict để lưu vào my_schedule []
+        schedule_init = {
+            "service_name": path,
+            "time_set": time_set
+        }
+        scheduleData.append(schedule_init)
+        for item in scheduleData:
+            print(item)
 
-        if time_set["EVD"] != []:
-            # print("==== EVD ======", time_set["EVD"])
-            evd(time_set["EVD"], read_json_file(file_name))
-        if time_set["EVT"] != []:
-            print("==== EVT ======", time_set["EVT"])
-            evt(time_set["EVT"], read_json_file(file_name))
+        print("type of schedule_init====== ", type(schedule_init))
+        # ghi schedule_init vào file schedule
+
+        #
+        # with open("scheduleData.json", "r") as f:
+        #     data = json.load(f)
+
+        print("type data ========> ", type(data))
+        writeFileData()
 
         # Ghi dữ liệu của "_" vào file myVal.txt
         # with open("result.txt", "w") as saveV:
         #     json.dump(data, saveV)
     return render_template("formSchedule.html")
 
+def checkExistsArr(arr, itemNew):
+    for item in arr:
+        if item["service_name"] == itemNew["service_name"] :
+
+
+def writeFileData():
+    # đọc file để lấy giá trị cũ
+    with open("scheduleData.json", "r") as rf:
+        old = json.load(rf)
+
+    scheduleData.extend(old)
+
+    print("============================================")
+    for item in scheduleData:
+        print("--------------before-----------------------")
+        print(item["service_name"], " :::: ", item["time_set"])
+    with open("scheduleData.json", "w") as sd:
+        json.dump(scheduleData, sd)
+
+    for item in scheduleData:
+        print("--------------after-----------------------")
+        print(item["service_name"], " <_____> ", item["time_set"])
 
 if __name__ == '__main__':
     app.run(debug=True)
