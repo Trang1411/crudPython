@@ -21,11 +21,12 @@
         </div>
         <div class="selectTag">
             <select id="selectTag" for="time_set">
+                <option value="EVM" name="EVM">Thời gian thức thi hàng tháng ()</option>
                 <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (HH:mm:ss)</option>
                 <option value="EVT" name="EVT">Khoảng thời gian thực thi (s)</option>
             </select>
             <input type="text" id="time_set" name="time_set" class="invalid"/>
-            <input id="time_set_hidden" name="time_set_hidden" value='{"EVT":[], "EVD":[]}' hidden="hidden"/>
+            <input id="time_set_hidden" name="time_set_hidden" value='{"EVM": [],"EVT":[], "EVD":[]}' hidden="hidden"/>
             <span>
             <input type="button" value="+" onclick="add()"/>
           </span>
@@ -51,7 +52,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
 <script>
-    var arr_data = {"EVD": [], "EVT": []};
+    var arr_data = {"EVM": [],"EVD": [], "EVT": []};
     // Lấy data đã lưu trước
         time_set_hidden = document.getElementById("time_set_hidden").value;
         time_set_hidden_value = JSON.parse(time_set_hidden);
@@ -64,8 +65,11 @@
         var input_time_set = document.getElementById("time_set");
         var time_set_value = document.getElementById("time_set").value;
 
+        // check exists của service_name trước khi save
+        service_name_value = check_exists_service_name()
+
         //check trc khi push
-        time_set_value =  check_input_format (select_value, time_set_value);
+        time_set_value = check_input_format (select_value, time_set_value);
 
         // Duyệt qua các key của mảng
         for (var key in arr_data) {
@@ -137,6 +141,27 @@
         }
     }
 
+    function check_exists_service_name(service_name){
+        // Lấy giá trị của service_name
+        var service_name_value = document.getElementById("service_name").value;
+
+        fetch('scheduleData.json')
+            .then(response => response.json()))
+            .then(schedule_data => {
+                // in4  scheduleData
+                schedule_data.forEach(schedule_item => {
+                    if(schedule_item[service_name] === service_name_value){
+                       service_name_value.setCustomValidity("Giá trị đã tồn tại, vui lòng nhập lại!");
+                       console.log(" Tên dịch vụ là ::: " + service_name)
+                       return false;
+                    }else{
+                        return service_name_value;
+                    }
+                })
+                )
+           });
+    }
+
     function check_input_format (select_value, time_set_value) {
         var input_time_set = document.getElementById("time_set");
         var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
@@ -156,6 +181,7 @@
             }
         }
     }
+
 
     function save(){
       var time_set_value = document.getElementById("time_set").value;

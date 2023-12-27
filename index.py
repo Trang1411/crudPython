@@ -78,12 +78,11 @@ def read_json_file(json_file):
                     globalVal[k] = globalVal.get(path)
 
         # Ghi dữ liệu của "_" vào file myVal.txt
-        with open("myVal.txt", "w") as saveV:
-            json.dump(globalVal, saveV)
+            writeFile("myVal.txt", globalVal)
     print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     return
 
-scheduleData = []
+
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
     global data
@@ -112,8 +111,7 @@ def form_schedule():
 
         # Ghi dữ liệu JSON vào tệp
         try:
-            with open(path, "w") as f:
-                json.dump(data, f)  # Ghi dữ liệu JSON trực tiếp
+            writeFile(path, data)
         except Exception as e:
             print("Lỗi ghi file:", e)
 
@@ -122,47 +120,37 @@ def form_schedule():
             "service_name": path,
             "time_set": time_set
         }
-        scheduleData.append(schedule_init)
-        for item in scheduleData:
-            print(item)
+        # check exists service_name, if exists -> False, if not exists -> append new schedule in scheduleData
+        newData = addNewItem(schedule_init)
+        if newData != False:
+            writeFileScheduleData(newData)
 
-        print("type of schedule_init====== ", type(schedule_init))
-        # ghi schedule_init vào file schedule
-
-        #
-        # with open("scheduleData.json", "r") as f:
-        #     data = json.load(f)
-
-        print("type data ========> ", type(data))
-        writeFileData()
-
-        # Ghi dữ liệu của "_" vào file myVal.txt
-        # with open("result.txt", "w") as saveV:
-        #     json.dump(data, saveV)
-    return render_template("formSchedule.html")
-
-def checkExistsArr(arr, itemNew):
-    for item in arr:
-        if item["service_name"] == itemNew["service_name"] :
+    return render_template("formSchedule.html", message="Lưu thành công!!!")
 
 
-def writeFileData():
-    # đọc file để lấy giá trị cũ
+def readFileScheduleData():
     with open("scheduleData.json", "r") as rf:
-        old = json.load(rf)
+        fileScheduleData = json.load(rf)
+    return fileScheduleData
 
-    scheduleData.extend(old)
 
-    print("============================================")
-    for item in scheduleData:
-        print("--------------before-----------------------")
-        print(item["service_name"], " :::: ", item["time_set"])
-    with open("scheduleData.json", "w") as sd:
-        json.dump(scheduleData, sd)
+def writeFileScheduleData(dataSave):
+    with open("scheduleData.json", "w") as saveData:
+        json.dump(dataSave, saveData)
 
-    for item in scheduleData:
-        print("--------------after-----------------------")
-        print(item["service_name"], " <_____> ", item["time_set"])
+def writeFile(filename, dataSave):
+    with open(filename, "w") as saveData:
+        json.dump(dataSave, saveData)
+
+def addNewItem(itemNew):
+    old = readFileScheduleData()
+    # không cần check ở đây nữa, check ngay khi input ở html bằng fetch(file.json)
+    for item in old:
+        if itemNew["service_name"] == item["service_name"]:
+            # old.remove(item["service_name"])
+            return False
+    return old.append(itemNew)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -49,7 +49,7 @@ def get_path(filename):
         return None
 
 # Hàm schedule.run_pending() kiểm tra xem thời gian thực hiện của tác vụ đầu tiên trong hàng đợi đã đến hay chưa.
-    # Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
+# Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
 def evd(time_list, read_json_file):
     for schedule_time in time_list:
         schedule.every().day.at(schedule_time).do(lambda: read_json_file("file_name"))
