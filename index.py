@@ -99,33 +99,36 @@ def form_schedule():
             print("Lỗi JSON:", e)
             return  # Dừng xử lý nếu phát hiện lỗi JSON
 
-        data = {
-            "service_name": service_name,
-            "config_file": config_file_dict,
-            "time_set": time_set
-        }
-
-        # lưu file config thành file.json
+        # lưu dữ liệu form schedule thành file.json
         file_name = service_name + ".json"
         path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
 
-        # Ghi dữ liệu JSON vào tệp
-        try:
-            writeFile(path, data)
-        except Exception as e:
-            print("Lỗi ghi file:", e)
+        # check service_name exists trước khi lưu
+        service_name_check = checkServiceName(service_name)
+        if service_name_check == False:
+            return render_template("formSchedule.html", message="Dữ liệu đã tồn tại, vui lòng nhập lại!!!")
+        else:
+            data = {
+                "service_name": service_name,
+                "config_file": config_file_dict,
+                "time_set": time_set
+            }
+            # Ghi dữ liệu JSON vào tệp
+            try:
+                writeFile(path, data)
+            except Exception as e:
+                print("Lỗi ghi file:", e)
 
-        # tạo dict để lưu vào my_schedule []
-        schedule_init = {
-            "service_name": path,
-            "time_set": time_set
-        }
-        # check exists service_name, if exists -> False, if not exists -> append new schedule in scheduleData
-        newData = addNewItem(schedule_init)
-        if newData != False:
-            writeFileScheduleData(newData)
+            # tạo dict để lưu vào scheduleData
+            schedule_init = {
+                "service_name": path,
+                "time_set": time_set
+            }
 
-    return render_template("formSchedule.html", message="Lưu thành công!!!")
+            writeFileScheduleData(schedule_init)
+            return render_template("formSchedule.html", message="Lưu thành công!!!")
+
+    return render_template("formSchedule.html")
 
 
 def readFileScheduleData():
@@ -142,14 +145,16 @@ def writeFile(filename, dataSave):
     with open(filename, "w") as saveData:
         json.dump(dataSave, saveData)
 
-def addNewItem(itemNew):
+def checkServiceName(service_name):
     old = readFileScheduleData()
-    # không cần check ở đây nữa, check ngay khi input ở html bằng fetch(file.json)
+    # nếu itemNew trùng với data trong file scheduleData thì thông báo cho người dùng
+    print("service_name check ====== ", service_name)
     for item in old:
-        if itemNew["service_name"] == item["service_name"]:
+        print(" of item in old ====== ", item)
+        # if service_name == item["service_name"]:
             # old.remove(item["service_name"])
-            return False
-    return old.append(itemNew)
+            # return False
+    return True
 
 
 if __name__ == '__main__':

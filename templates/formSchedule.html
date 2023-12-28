@@ -141,26 +141,7 @@
         }
     }
 
-    function check_exists_service_name(service_name){
-        // Lấy giá trị của service_name
-        var service_name_value = document.getElementById("service_name").value;
 
-        fetch('scheduleData.json')
-            .then(response => response.json()))
-            .then(schedule_data => {
-                // in4  scheduleData
-                schedule_data.forEach(schedule_item => {
-                    if(schedule_item[service_name] === service_name_value){
-                       service_name_value.setCustomValidity("Giá trị đã tồn tại, vui lòng nhập lại!");
-                       console.log(" Tên dịch vụ là ::: " + service_name)
-                       return false;
-                    }else{
-                        return service_name_value;
-                    }
-                })
-                )
-           });
-    }
 
     function check_input_format (select_value, time_set_value) {
         var input_time_set = document.getElementById("time_set");
