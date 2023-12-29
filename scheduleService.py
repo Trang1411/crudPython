@@ -3,7 +3,8 @@ import os
 
 from flask import Flask, render_template, request, jsonify
 
-from lib import evd, evt
+from lib import (readFileScheduleData, writeFileScheduleData,
+                 writeFile)
 
 def schedule():
     # đọc file scheduleData (chứa thông tin service_name và time_set tương ứng)

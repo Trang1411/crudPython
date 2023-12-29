@@ -66,10 +66,10 @@
         var time_set_value = document.getElementById("time_set").value;
 
         // check exists của service_name trước khi save
-        service_name_value = check_exists_service_name()
+        // service_name_value = check_exists_service_name()
 
         //check trc khi push
-        time_set_value = check_input_format (select_value, time_set_value);
+        time_set_value = check_time_set(select_value, time_set_value);
 
         // Duyệt qua các key của mảng
         for (var key in arr_data) {
@@ -94,9 +94,12 @@
                 var cell1 = row.insertCell(0);
                 var cell2 = row.insertCell(1);
                 var cell3 = row.insertCell(2);
-                if(k === "EVD"){
+                if(k === "EVM"){
+                   cell1.innerHTML = "Thời gian thực thi hàng tháng (dd hh:mm:ss)";
+                   cell2.innerHTML = arr_data["EVM"][i];
+                }else if(k === "EVD"){
                    if(!moment(arr_data["EVD"][i]).isValid()){
-                      cell1.innerHTML = "Thời gian thực thi trong ngày (HH:mm:ss)";
+                      cell1.innerHTML = "Thời gian thực thi hàng ngày (hh:mm:ss)";
                    }
                    cell2.innerHTML = arr_data["EVD"][i];
                 }else{
@@ -142,22 +145,28 @@
     }
 
 
-
-    function check_input_format (select_value, time_set_value) {
+    function check_time_set(select_value, time_set_value) {
         var input_time_set = document.getElementById("time_set");
         var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
         var isInteger = !isNaN(time_set_value) && time_set_value > 0;
+        // Định dạng ngày tháng và thời gian
+        isDate = moment(time_set_value, "DD HH:mm:ss");
 
-        if(!isInteger || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
+        if((select_value === "EVM" && !isDate.isValid()) || !isInteger || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
             input_time_set.setCustomValidity("Dữ liệu đầu vào không hợp lệ");
             console.log("Giá 0000 trị hợp lệ");
-             return false;
+            return false;
         }else{
             // Dữ liệu đầu vào hợp lệ
             console.log("Giá trị hợp lệ");
             if(select_value === "EVD"){
               return is_HH_mm_ss.subtract(1,'days').format('HH:mm:ss')
-            }else{
+            }
+            if(select_value === "EVM"){
+            // Lưu ngày tháng và thời gian đã được định dạng
+             return time_set_value = moment(time_set_value, "DD HH:mm:ss");
+            }
+            else{
               return time_set_value;
             }
         }

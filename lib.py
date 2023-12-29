@@ -1,8 +1,11 @@
 import glob
+from datetime import datetime
 
 import requests
 import schedule
 import time
+
+from flask import json
 
 
 def _post(url, headers, body):
@@ -64,3 +67,31 @@ def evt(time_list, read_json_file):
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+def evm (time_list, read_json_file):
+    global day_of_month
+    for schedule_time in time_list:
+        # Kiểm tra xem ngày của tháng có phải là 29 hoặc 30 hay không.
+
+        if datetime.datetime.now().day == 29 or datetime.datetime.now().day == 30:
+            if datetime.datetime.now().month % 4 == 0:
+            # Thay đổi ngày của tháng thành 28 hoặc 29.
+                schedule_time = 28
+            else:
+                schedule_time = 29
+        # Tạo công việc.
+        schedule.every().month(day_of_month).do(lambda: read_json_file("file_name"))
+
+def readFileScheduleData():
+    with open("scheduleData.json", "r") as rf:
+        fileScheduleData = json.load(rf)
+    return fileScheduleData
+
+
+def writeFileScheduleData(dataSave):
+    with open("scheduleData.json", "w") as saveData:
+        json.dump(dataSave, saveData)
+
+def writeFile(filename, dataSave):
+    with open(filename, "w") as saveData:
+        json.dump(dataSave, saveData)

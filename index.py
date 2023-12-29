@@ -1,11 +1,12 @@
 import json
 import os
-from collections.abc import Set
 
 from flask import Flask, render_template, request, jsonify
 
 from lib import (_get, _put, _post, _upload_file,
-                 get_value_by_path, get_path, evd, evt)
+                 get_value_by_path, get_path,
+                 readFileScheduleData, writeFileScheduleData,
+                 writeFile)
 
 app = Flask(__name__)
 
@@ -85,67 +86,56 @@ def read_json_file(json_file):
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
-    global data
+    global data, config_file_dict
     if request.method == 'POST':
         service_name = request.form.get('service_name')
         config_file_request = request.form.get('config_file')
         time_set = request.form.get('time_set_hidden')
-        # print("config file  ==============>>>> ", config_file_request)
+        print("service_name  ==============>>>> ", service_name)
 
         try:
             time_set = json.loads(time_set)
             config_file_dict = json.loads(config_file_request)
         except json.JSONDecodeError as e:
             print("Lỗi JSON:", e)
-            return  # Dừng xử lý nếu phát hiện lỗi JSON
+            render_template("formSchedule.html", message="Lỗi JSON, vui lòng kiểm tra dữ liệu")  # Dừng xử lý nếu phát hiện lỗi JSON
 
         # lưu dữ liệu form schedule thành file.json
         file_name = service_name + ".json"
         path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
 
         # check service_name exists trước khi lưu
-        service_name_check = checkServiceName(service_name)
-        if service_name_check == False:
-            return render_template("formSchedule.html", message="Dữ liệu đã tồn tại, vui lòng nhập lại!!!")
-        else:
-            data = {
-                "service_name": service_name,
-                "config_file": config_file_dict,
-                "time_set": time_set
-            }
-            # Ghi dữ liệu JSON vào tệp
-            try:
-                writeFile(path, data)
-            except Exception as e:
-                print("Lỗi ghi file:", e)
+        # service_name_check = checkExistsServiceName(service_name)
+        # if service_name_check == False:
+        #     return render_template("formSchedule.html", message="Dữ liệu đã tồn tại, vui lòng nhập lại!!!")
+        # else:
+        data = {
+            "service_name": service_name,
+            "config_file": config_file_dict,
+            "time_set": time_set
+        }
+        # Ghi dữ liệu JSON vào tệp
+        try:
+            writeFile(path, data)
+        except Exception as e:
+            print("Lỗi ghi file:", e)
 
-            # tạo dict để lưu vào scheduleData
-            schedule_init = {
-                "service_name": path,
-                "time_set": time_set
-            }
-
-            writeFileScheduleData(schedule_init)
-            return render_template("formSchedule.html", message="Lưu thành công!!!")
+        # tạo dict để lưu vào scheduleData
+        schedule_init = {
+            "service_name": path,
+            "time_set": time_set
+        }
+        old = readFileScheduleData()
+        old.append(schedule_init)
+        writeFileScheduleData(old)
+            # return render_template("formSchedule.html", message="Lưu thành công!!!")
 
     return render_template("formSchedule.html")
 
 
-def readFileScheduleData():
-    with open("scheduleData.json", "r") as rf:
-        fileScheduleData = json.load(rf)
-    return fileScheduleData
 
 
-def writeFileScheduleData(dataSave):
-    with open("scheduleData.json", "w") as saveData:
-        json.dump(dataSave, saveData)
-
-def writeFile(filename, dataSave):
-    with open(filename, "w") as saveData:
-        json.dump(dataSave, saveData)
-
-def checkServiceName(service_name):
+def checkExistsServiceName(service_name):
     old = readFileScheduleData()
     # nếu itemNew trùng với data trong file scheduleData thì thông báo cho người dùng
     print("service_name check ====== ", service_name)
@@ -154,7 +144,7 @@ def checkServiceName(service_name):
         # if service_name == item["service_name"]:
             # old.remove(item["service_name"])
             # return False
-    return True
+    # return True
 
 
 if __name__ == '__main__':
