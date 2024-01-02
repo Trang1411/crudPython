@@ -6,26 +6,30 @@
 </head>
 <body>
 <div>
-    <h1>Form đăng ký</h1>
-    <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center">
+    <h1 style="text-align: center;">Form đăng ký</h1>
+    <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center" name="myForm">
         <div>
             <label>Tên dịch vụ</label>
             <span>
-            <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ"
-                   style="width: 468px" required/>
+            <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required />
           </span>
             <label> Config </label>
             <span>
+
             <textarea name="config_file" id="config_file" rows="36" cols="62" placeholder="Nhập file config"></textarea>
           </span>
         </div>
         <div class="selectTag">
             <select id="selectTag" for="time_set">
-                <option value="EVM" name="EVM">Thời gian thức thi hàng tháng ()</option>
-                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (HH:mm:ss)</option>
-                <option value="EVT" name="EVT">Khoảng thời gian thực thi (s)</option>
+                <option value="EVM" name="EVM">Thời gian thức thi hàng tháng</option>
+                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày</option>
+                <option value="EVT" name="EVT">Khoảng thời gian thực thi</option>
             </select>
-            <input type="text" id="time_set" name="time_set" class="invalid"/>
+            <div id="time_set">
+                <input type="text" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
+                <input type="text" id="time_set_time" name="time_set_time" placeholder="Nhập thời gian">
+            </div>
+
             <input id="time_set_hidden" name="time_set_hidden" value='{"EVM": [],"EVT":[], "EVD":[]}' hidden="hidden"/>
             <span>
             <input type="button" value="+" onclick="add()"/>
@@ -52,35 +56,76 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
 <script>
-    var arr_data = {"EVM": [],"EVD": [], "EVT": []};
-    // Lấy data đã lưu trước
+       var arr_data = {"EVM": [],"EVD": [], "EVT": []};
+       // Lấy data đã lưu trước
         time_set_hidden = document.getElementById("time_set_hidden").value;
         time_set_hidden_value = JSON.parse(time_set_hidden);
 
+        // lấy service_name
+        service_name = document.getElementById("service_name");
+
+      // lấy select và input tương ứng
+        select = document.getElementById("selectTag");
+        var time_set_day = document.getElementById("time_set_day");
+        var time_set_time = document.getElementById("time_set_time");
+
+      $('#selectTag').change(function(){
+        var select_value = $(this).val();
+        if(select_value === 'EVM'){
+            time_set_day.style.display = "block";
+            time_set_time.style.display = "block";
+
+        }else {
+            time_set_day.style.display = "none";
+            time_set_time.style.display = "block";
+
+        }
+      });
+
     function add() {
-        // lấy giá trị của select
-        var select_value = document.getElementById("selectTag").value;
+        var input_time_set = document.getElementById("time_set");
 
         // lấy giá trị của input
-        var input_time_set = document.getElementById("time_set");
-        var time_set_value = document.getElementById("time_set").value;
+        if(select.value === "EVM"){
+            if(time_set_day.value === ""){
+                 document.getElementById("time_set_day").value = "1";
+            }
+
+            if(time_set_time.value === ""){
+                 document.getElementById("time_set_time").value = "0";
+            }
+
+            var time_set_value = {"day": time_set_day.value, "hour": time_set_time.value};
+        }else {
+            if(time_set_time.value === ""){
+                 document.getElementById("time_set_time").value = "0";
+            }else{
+                var time_set_value = document.getElementById("time_set_time").value;
+            }
+        }
+
+        //check trc khi push
+        time_set_value = check_time_set(select.value, time_set_value);
+        if(select.value === "EVM" && time_set_value !== false){
+             day = time_set_value.day;
+             hour = time_set_value.hour;
+        }
 
         // check exists của service_name trước khi save
         // service_name_value = check_exists_service_name()
 
-        //check trc khi push
-        time_set_value = check_time_set(select_value, time_set_value);
-
         // Duyệt qua các key của mảng
         for (var key in arr_data) {
-             if (time_set_value !== false && select_value === key) {
+             if (time_set_value !== false && select.value === key) {
                 // Thêm giá trị vào mảng tương ứng
                 arr_data[key].push(time_set_value);
              }
+
         }
 
         // Đặt giá trị input về rỗng sau khi kiểm tra
-        document.getElementById("time_set").value = "";
+        document.getElementById("time_set_day").value = "";
+        document.getElementById("time_set_time").value = "";
 
         var dataTable = document.getElementById("dataTable");
 
@@ -96,7 +141,7 @@
                 var cell3 = row.insertCell(2);
                 if(k === "EVM"){
                    cell1.innerHTML = "Thời gian thực thi hàng tháng (dd hh:mm:ss)";
-                   cell2.innerHTML = arr_data["EVM"][i];
+                   cell2.innerHTML = arr_data["EVM"][i].day + " " + arr_data["EVM"][i].hour;
                 }else if(k === "EVD"){
                    if(!moment(arr_data["EVD"][i]).isValid()){
                       cell1.innerHTML = "Thời gian thực thi hàng ngày (hh:mm:ss)";
@@ -131,12 +176,15 @@
            // xóa phần tử trong mảng khi -
             if ("Thời gian thực thi trong ngày (HH:mm:ss)" === label){
                 var index = arr_data["EVD"].indexOf(value);
-                console.log("xóa ở EVD ... ===> " + arr_data["EVD"])
+                // console.log("xóa ở EVD ... ===> " + arr_data["EVD"])
                 arr_data["EVD"].splice(index, 1);
-            }else{
+            }else if("Khoảng thời gian giữa 2 lần thực thi (s)" === label){
                 console.log(" xóa ở EVT ... ===> " + arr_data["EVT"])
                 var index = arr_data["EVT"].indexOf(value);
                 arr_data["EVT"].splice(index, 1);
+            }else {
+                var index = arr_data["EVM"].indexOf(value);
+                arr_data["EVM"].splice(index, 1);
             }
 
           // Xóa dòng trong bảng khi click -
@@ -146,57 +194,80 @@
 
 
     function check_time_set(select_value, time_set_value) {
-        var input_time_set = document.getElementById("time_set");
-        var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
-        var isInteger = !isNaN(time_set_value) && time_set_value > 0;
-        // Định dạng ngày tháng và thời gian
-        isDate = moment(time_set_value, "DD HH:mm:ss");
+         var input_time_set = document.getElementById("time_set");
+         var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
+         var isInteger = true
+         var is_hour = true
+         var day
+         var is_day = true
 
-        if((select_value === "EVM" && !isDate.isValid()) || !isInteger || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
-            input_time_set.setCustomValidity("Dữ liệu đầu vào không hợp lệ");
+         if(select_value === "EVT"){
+            isInteger = !isNaN(time_set_value) && time_set_value > 0;
+         }
+
+
+         if(select_value === "EVM"){
+            day = time_set_value["day"];
+            // console.log("day ===" + day)
+
+            var hour = time_set_value["hour"];
+            console.log("hour ===" + hour)
+
+            is_day = !isNaN(day) && day > 0 && day <=31;
+            console.log("is_day ===" + is_day)
+
+            is_hour = moment(hour, "HH:mm:ss");
+            console.log("is_hour ===" + is_hour)
+        }
+
+        // Định dạng ngày tháng và thời gian
+
+        if((select_value === "EVM" &&  (is_hour.isValid() == false || is_day == false)) || (select_value === "EVT" && !isInteger) || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
+            // input_time_set.validationMessage = "Input không hợp lệ";
+            alert("Giá trị nhập vào không hợp lệ!!!")
             console.log("Giá 0000 trị hợp lệ");
             return false;
         }else{
             // Dữ liệu đầu vào hợp lệ
             console.log("Giá trị hợp lệ");
             if(select_value === "EVD"){
-              return is_HH_mm_ss.subtract(1,'days').format('HH:mm:ss')
-            }
-            if(select_value === "EVM"){
-            // Lưu ngày tháng và thời gian đã được định dạng
-             return time_set_value = moment(time_set_value, "DD HH:mm:ss");
-            }
-            else{
-              return time_set_value;
+              return is_HH_mm_ss.subtract(1,'days').format('HH:mm:ss');
+            }else if(select_value === "EVM"){
+              return {"day": day, "hour":  is_hour.subtract(1,'days').format('HH:mm:ss')};
+            }else{
+                return time_set_value;
             }
         }
     }
 
 
     function save(){
-      var time_set_value = document.getElementById("time_set").value;
-      if(time_set_value !== ""){
-            add(); // Thêm dữ liệu mới vào mảng trước khi lưu
-      }
-      document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
-      // Gửi form để lưu dữ liệu
-      document.forms[0].submit();
+        if (service_name.value === "") {
+              alert("Bạn phải nhập tên dịch vụ!");
+              return false;
+         }
+
+       document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
+       // Gửi form để lưu dữ liệu
+       document.forms[0].submit();
     }
 </script>
 <style>
     body {
+         height: 250px;
+         width: 568px;
          padding-top: 50px;
-         text-align: center;
+         text-align: left;
          background-color: lightblue;
          color: darkblue;
-         width: auto;
-         front-size: 18;
+         font-size: 18px;
          margin: auto;
          padding: auto;
     }
     label {
         display: flex;
-        justify-content: center;
+        justify-content: left;
+
         margin: auto;
         padding: auto;
     }
@@ -207,5 +278,57 @@
         width: 420px;
         margin: 20px;
         padding: 15px;
-}
+
+
+    }
+    table.td {
+        font-size: 16px;
+        justify-content: left;
+    }
+
+    button {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 6px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    button[type="submit"] {
+        background-color: #34a853;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    select {
+        width: 468px;
+    }
+
+    #time_set {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #time_set_day, #time_set_time {
+        flex: 1;
+    }
+
+    input[type="text"],
+    textarea, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input:required {
+    border: red;
+    }
 </style>
