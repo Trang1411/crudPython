@@ -2,84 +2,79 @@ import json
 import os
 from json import JSONDecodeError
 
-from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, make_response
 
-from lib import (evd, evt, evm, writeFile,
-                 readFileScheduleData, writeFileScheduleData, executeFile
-                 )
+from lib import writeFile, readFileScheduleData, writeFileScheduleData, executeFile
 
 app = Flask(__name__)
 
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
-    global data, config_file_dict, time_set, jsonErr, service_name_exists
+    global data, config_file_dict, time_set, service_name_request, config_file_request, time_set_request, queryString, time_save
     if request.method == 'POST':
-        service_name_request = request.form.get('service_name')
-        config_file_request = request.form.get('config_file')
-        time_set_request = request.form.get('time_set_hidden')
-        print("time set ==== ", time_set_request)
-
         try:
+            # Lấy thông tin nhập vào từ form và chuển sang đối tượng python (nếu cần)
+            service_name_request = request.form.get('service_name')
+            config_file_request = request.form.get('config_file')
+            time_set_request = request.form.get('time_set_hidden')
+            print("=====time_set_request ==== ", time_set_request)
             time_set = json.loads(time_set_request)
+            print(" time_set loads ======== ", time_set)
             config_file_dict = json.loads(config_file_request)  # nếu file rỗng sẽ báo lỗi JSONDecodeError
             # lưu dữ liệu form schedule thành file.json
             file_name = service_name_request + ".json"
             path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
-
-            # check service_name exists trước khi lưu
-            # service_name_check = checkServiceNameExists(service_name)
-            # if service_name_check == True:
-            #     flash("Tên dịch vụ đã tồn tại. Vui lòng nhập lại!")
-            #     return
-            # else:
-            data = {
-                "service_name": service_name_request,
-                "config_file": config_file_dict,
-                "time_set": time_set
-            }
-            # Ghi dữ liệu JSON vào tệp
-            try:
-                writeFile(path, data)
-            except Exception as e:
-                print("Lỗi ghi file:", e)
-
-            time_set_add = {}
-            # tạo dict để lưu vào scheduleData
-            # loại bỏ thành phần không có giá trị (ví dụ: "EVT" = [])
-            for key in time_set.keys():
-                print("--key----time_set.get(key)----------", key, " ::: ", time_set.get(key))
-                if time_set.get(key):
-                    time_set_add[key] = time_set.get(key)
-
-            # print("time_set sau khi xóa những phần tử rỗng ::: ", time_set_add)
-            schedule_init = {
-                "service_name": path,
-                "time_set": time_set_add
-            }
+            print("path ======== ", path)
 
             old = readFileScheduleData()
-            old.append(schedule_init)
-            writeFileScheduleData(old)
+            # tạo dict để lưu vào scheduleData
+            # loại bỏ thành phần không có giá trị (ví dụ: "EVT" = []) và lưu vào dict schedulaData time_set : [service_name]
+            for key in time_set.keys():
+                if time_set[key]:
+                    for ts in time_set[key]:
+                        if key == "EVM":
+                            d = ts["day"]
+                            if len(d) == 1:
+                                d = "0" + d
+                            h = ts["hour"]
+                            time_save = d + "_" + h
+                            print("sau định dạng của EVM ============ ", time_save)
+                        # duyệt mảng giá trị của key và check với scheduleData, nếu key = EVM thì thay đổi định dạng và lưu dưới dạng dHHmmss
+                        else:
+                            time_save = ts
+                        if time_save not in old:
+                            print(f"add {time_save} vào old thôiiiiiiiii")
+                            old[time_save] = [path]
+                        else:
+                            print("old[time_save] =========== ", old[time_save])
+                            old[time_save].append(path)
+                        writeFileScheduleData(old)
+            # check service_name exists trước khi lưu
+            if not os.path.exists(path):
+                data = {
+                    "service_name": service_name_request,
+                    "config_file": config_file_dict,
+                    "time_set": time_set
+                }
+                # Ghi dữ liệu JSON vào tệp
+                writeFile(path, data)
+            else:
+                flash("Tên dịch vụ đã tồn tại. Vui lòng nhập lại!", 'error')
         except JSONDecodeError as e:
-            print(e)
-            jsonErr = "Nội dung file config chưa chính xác, vui lòng kiểm tra lại!!!"
-            service_name_exists = "Tên dịch vụ đã tồn tại, vui lòng nhập tên khác!!!"
+            print("---------JSONDecodeError--------- ", e)
+            flash("Nội dung config chưa chính xác, vui lòng kiểm tra lại!!!", 'error')
+            queryString = f'service_name={service_name_request}&config_file={config_file_request}&time_set_hidden={time_set_request}'
+            return redirect('/schedule')
 
-            return redirect(url_for("form_schedule", jsonErr=jsonErr, service_name_exists=service_name_exists))
-
-    # for k, v in request.args.items():
-    #     print(f"k = {k}, v = {v}")
-
-    return render_template("formSchedule.html", messages=request.args.get("messages"))
+    return render_template("formSchedule.html")  # , messages=request.args.get("messages")
 
 
 if __name__ == '__main__':
-
     SECRET_KEY = os.urandom(32)
     app.config['SECRET_KEY'] = SECRET_KEY
     app.secret_key = SECRET_KEY
     app.run(debug=True)
-    check = True
-    while check:
-        executeFile()
+    # check = True
+    # while check:
+    # executeFile()

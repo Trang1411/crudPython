@@ -6,6 +6,7 @@ import time
 import json
 import os
 import calendar
+import re
 
 from datetime import datetime
 
@@ -139,47 +140,27 @@ def writeFile(filename, dataSave):
         json.dump(dataSave, saveData)
 
 
-def checkServiceNameExists(service_name):
-    old = readFileScheduleData()
-    # nếu itemNew trùng với data trong file scheduleData thì thông báo cho người dùng
-    print("service_name check ====== ", service_name)
-    for item in old:
-        print("service_name of item in old ====== ", item["service_name"])
-        # if service_name == item["service_name"]:
-        # old.remove(item["service_name"])
-        # return False
-    return True
-
-
 def executeFile():
     dataFile = readFileScheduleData()
     # print("type of file scheduleData ============= ", type(dataFile))
     # print("check file scheduleData ============= ", dataFile)
-    for item in dataFile:
-
-        print("check implementFile - file_name ::::: ", item["service_name"])
-        data = item["time_set"]
-        for key in data.keys():
-            if key == "EVT":
-                evt(data["EVT"], item["service_name"])
-
-            if key == "EVD":
-                evd(data["EVD"], item["service_name"])
-
-            if key == "EVM":
-                evm(data["EVM"], item["service_name"])
-
-        continue
+    regex = r"^([0-9]{2}):([0-9]{2}):([0-9]{2})$"
+    for key, values in dataFile:
+        # Kiểm tra chuỗi có đúng định dạng hh:mm:ss hay không
+        if len(key) == 8 and re.fullmatch(regex, key) is not None:
+            evd(key, values)
+        if "_" in key:
+            evm(key, values)
+        else:
+            evt(key, values)
 
 
 # So sánh thời gian hiện tại với thời gian đã set
 def isHHmmss(time_set_value):
     # Lấy thời gian hiện tại
     now = datetime.now()
-
     # chuyển str time_set_value thành thời gian
     time_set_value = datetime.strptime(time_set_value, "%H:%M:%S")
-
     # So sánh với giờ time_set_value
     if now.hour == time_set_value.hour and now.minute == time_set_value.minute and now.second == time_set_value.second:
         return True
@@ -191,7 +172,6 @@ def isDayHHmmss(day, hhmmss):
     # Lấy ngày hiện tại và kiểm tra giờ hiện tại
     day_now = datetime.today().day
     hhmmss_check = isHHmmss(hhmmss)
-
     if int(day) == day_now and hhmmss_check is True:
         return True
     else:
@@ -200,47 +180,42 @@ def isDayHHmmss(day, hhmmss):
 
 # Hàm schedule.run_pending() kiểm tra xem thời gian thực hiện của tác vụ đầu tiên trong hàng đợi đã đến hay chưa.
 # Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
-def evd(time_list, file_name):
-    print("time_list evd ============== ", time_list)
-    for schedule_time in time_list:
-        # kiểm tra thời điểm hiện tại có phải đến giờ thực thi hay không, nếu True thì thực thi
-        check = isHHmmss(schedule_time)
-        if check is True:
-            schedule.every().day.at(schedule_time).do(lambda: read_json_file(file_name))
+def evd(time_run, file_names):
+    check = isHHmmss(time_run)
+    if check is True:
+        for file_name in file_names:
+            # kiểm tra thời điểm hiện tại có phải đến giờ thực thi hay không, nếu True thì thực thi
+            schedule.every().day.at(time_run).do(lambda: read_json_file(file_name))
     while True:
         schedule.run_pending()
         time.sleep(1)
 
 
-def evt(time_list, file_name):
-
-    for schedule_time in time_list:
-        print("check file_name in function ev... ", file_name, " ------------ schedule_time --------------", schedule_time)
-        schedule.every(int(schedule_time)).seconds.do(lambda: read_json_file(file_name))
-
+def evt(time_run, file_names):
+    for file_name in file_names:
+        print("check file_name in function ev... ", file_name, " ------------ schedule_time --------------", time_run)
+        schedule.every(int(time_run)).seconds.do(lambda: read_json_file(file_name))
     while True:
         schedule.run_pending()
         time.sleep(1)
 
 
-def evm(time_list, file_name):
+def evm(time_run, file_names):
     # Lấy tháng hiện tại
     month = datetime.today().month
     # Lấy số ngày trong tháng hiện tại
     days_in_month = calendar.monthrange(month, 1)[0]
-    print("010101010101010101010 ", time_list)
-
-    for item in time_list:
-        day = item["day"]
-        hour = item["hour"]
-        checkDayHHmmss = isDayHHmmss(day, hour)
-
-        if checkDayHHmmss is True:
-            if int(day) > days_in_month:
-                day = days_in_month
-            else:
-                day = day
-            schedule.every().month.day(day).at(hour).do(lambda: read_json_file(file_name))
+    day = time_run[:2]
+    hour = time_run[3:]
+    print(f"====---- day là {day}, hour là {hour} ----====")
+    checkDayHHmmss = isDayHHmmss(day, hour)
+    if checkDayHHmmss is True:
+        if int(day) > days_in_month:
+            day = days_in_month
+        else:
+            day = day
+    for file_name in file_names:
+        schedule.every().month.day(day).at(hour).do(lambda: read_json_file(file_name))
     # while True:
     schedule.run_pending()
     time.sleep(1)

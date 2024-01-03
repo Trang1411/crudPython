@@ -4,7 +4,20 @@
     <meta charset="UTF-8"/>
     <title>Form Schedule</title>
 </head>
+
 <body>
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="alert-message block-message error">
+  <a class="close" href="#">×</a>
+  <ul>
+    {%- for msg in errors %}
+    <li>{{ msg }}</li>
+    {% endfor -%}
+  </ul>
+</div>
+{% endif %}
+{% endwith %}
 <div>
     <h1 style="text-align: center;">Form đăng ký</h1>
     <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center" name="myForm">
@@ -49,14 +62,11 @@
             </table>
         </label>
     </div>
-    <div>
-        {% if jsonErr %}
-        <h3 id="jsonErr_value" value="{{ jsonErr }}" hidden="hidden"></h3>
-        {% endif %}
-    </div>
+
 
 </div>
 </body>
+
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
@@ -257,6 +267,27 @@
        // Gửi form để lưu dữ liệu
        document.forms[0].submit();
     }
+    document.querySelector('form').addEventListener('submit', function(event) {
+        // Gửi nội dung form
+         fetch("{{ url_for('form_schedule')}}", {
+            method: "post",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `service_name=${service_name}`,
+          });
+
+          // Ngăn chặn form submit theo cách thông thường
+          event.preventDefault();
+
+          // Kiểm tra kết quả gửi form
+          if (response.status === 303) {
+            alert("Nội dung config không đúng format, vui lòng kiểm tra lại!");
+          }
+          if (response.status === 302){
+             alert("Tên dịch vụ đã tồn tại, vui lòng nhập tên khác!");
+          }
+        });
 </script>
 <style>
     body {
