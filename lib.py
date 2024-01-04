@@ -1,4 +1,5 @@
 import glob
+from functools import partial
 
 import requests
 import schedule
@@ -7,6 +8,7 @@ import json
 import os
 import calendar
 import re
+import logging
 
 from datetime import datetime
 
@@ -61,7 +63,7 @@ def read_json_file(json_file):
     global file_path
     globalVal = {}
     # Đọc file json
-    # print("0000000000000", json_file)
+    print("0000000000000", json_file)
 
     with open(json_file, "r") as file:
         data_file_json = json.load(file)
@@ -69,58 +71,60 @@ def read_json_file(json_file):
     # print("======================>> ", type(data_file_json))
     # print("======================>> ", data_file_json)
     # Lấy dữ liệu của "_" trong mỗi json và lưu vào globalVal
-    config_file_json = data_file_json["config_file"]
+    config_file = data_file_json["config_file"]
+    for config_file_json in config_file:
 
-    # Lấy dữ liệu của mỗi mục trong json
-    body = config_file_json.get("body")
-    headers = config_file_json.get("headers")
-    url = config_file_json.get("url")
-    _pr = config_file_json.get("_")
-    method = config_file_json.get("method")
-    response_data = {}
+        # Lấy dữ liệu của mỗi mục trong json
+        body = config_file_json.get("body")
+        headers = config_file_json.get("headers")
+        url = config_file_json.get("url")
+        _pr = config_file_json.get("_")
+        method = config_file_json.get("method")
+        response_data = {}
 
-    # check body của mỗi item để chuẩn bị request
-    if body is not None:
-        for k, v in body.items():
-            if "$" in str(v):
-                v = v.replace("$", "")
-                body[k] = globalVal.get(v)
-            # lấy file_path của _file và check exists
-            if k == "_file":
-                file_path = get_path(str(v))
-                # print("file_path:::::::::::::", file_path)
-                #     Kiểm tra file có tồn tại hay không?
-                if os.path.exists(file_path):
-                    print("The file exists.")
+        # check body của mỗi item để chuẩn bị request
+        if body is not None:
+            for k, v in body.items():
+                if "$" in str(v):
+                    v = v.replace("$", "")
+                    body[k] = globalVal.get(v)
+                # lấy file_path của _file và check exists
+                if k == "_file":
+                    file_path = get_path(str(v))
+                    # print("file_path:::::::::::::", file_path)
+                    #     Kiểm tra file có tồn tại hay không?
+                    if os.path.exists(file_path):
+                        print("The file exists.")
+                    else:
+                        print("The file does not exist.")
+        # Thực hiện request
+        if method == "POST":
+            response_data = _post(url, headers, body)
+        if method == "GET":
+            response_data = _get(url, headers, body)
+        if method == "PUT":
+            response_data = _put(url, headers, body)
+        if method == "UPLOAD_FILE":
+            with open(file_path, "rb") as image_file:
+                response_data = _upload_file(url, headers, body, {"file": image_file})
+
+        print("response_data ====== ", response_data)
+        #     Thực hiện lấy response trả về "_" và lưu vào globalVal
+        if _pr is not None:
+            for k, v in _pr.items():
+                # chuyển đổi v thành path để lấy giá trị trong response
+                path = v.replace("$", "")
+                print("v_path  ======", path)
+                value = get_value_by_path(response_data, path)
+                if value is not None:
+                    globalVal[k] = value
                 else:
-                    print("The file does not exist.")
-    # Thực hiện request
-    if method == "POST":
-        response_data = _post(url, headers, body)
-    if method == "GET":
-        response_data = _get(url, headers, body)
-    if method == "PUT":
-        response_data = _put(url, headers, body)
-    if method == "UPLOAD_FILE":
-        with open(file_path, "rb") as image_file:
-            response_data = _upload_file(url, headers, body, {"file": image_file})
+                    globalVal[k] = globalVal.get(path)
 
-    print("response_data ====== ", response_data)
-    #     Thực hiện lấy response trả về "_" và lưu vào globalVal
-    if _pr is not None:
-        for k, v in _pr.items():
-            # chuyển đổi v thành path để lấy giá trị trong response
-            path = v.replace("$", "")
-            print("v_path  ======", path)
-            value = get_value_by_path(response_data, path)
-            if value is not None:
-                globalVal[k] = value
-            else:
-                globalVal[k] = globalVal.get(path)
-
-        # Ghi dữ liệu của "_" vào file myVal.txt
-        writeFile("myVal.txt", globalVal)
-    print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            # Ghi dữ liệu của "_" vào file myVal.txt
+            writeFile("myVal.txt", globalVal)
+        print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(f"Thời gian chạy {json_file} là  ============== ", datetime.now())
     return
 
 
@@ -144,15 +148,26 @@ def executeFile():
     dataFile = readFileScheduleData()
     # print("type of file scheduleData ============= ", type(dataFile))
     # print("check file scheduleData ============= ", dataFile)
-    regex = r"^([0-9]{2}):([0-9]{2}):([0-9]{2})$"
-    for key, values in dataFile:
+
+    for key in dataFile.keys():
         # Kiểm tra chuỗi có đúng định dạng hh:mm:ss hay không
-        if len(key) == 8 and re.fullmatch(regex, key) is not None:
-            evd(key, values)
-        if "_" in key:
-            evm(key, values)
+        check = is_time(key)
+        print(f"check format hh:mm:ss của {key} là ::::::: ", check)
+        if len(key) == 8 and check is True:
+            evd(key, dataFile[key])
+        elif "_" in key:
+            evm(key, dataFile[key])
         else:
-            evt(key, values)
+            evt(key, dataFile[key])
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+def is_time(key):
+    parts = key.split(":")
+    if len(parts) == 3 and all(part.isdigit() for part in parts) and re.match(r"^\d{2}:\d{2}:\d{2}$", key) is not None:
+        return True
+    return False
 
 
 # So sánh thời gian hiện tại với thời gian đã set
@@ -182,29 +197,40 @@ def isDayHHmmss(day, hhmmss):
 # Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
 def evd(time_run, file_names):
     check = isHHmmss(time_run)
+    file_name = file_names[0]
     if check is True:
         for file_name in file_names:
             # kiểm tra thời điểm hiện tại có phải đến giờ thực thi hay không, nếu True thì thực thi
-            schedule.every().day.at(time_run).do(lambda: read_json_file(file_name))
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+            job = schedule.every().day.at(time_run).do(lambda: read_json_file(file_name))
+            print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
+            print(f"Thời gian lần thực thi trước đó của file {file_name} là: {job.last_run}")
+
+    # while True:
+    #     for file_name in file_names:
+    #         schedule.run_pending()
+    #         time.sleep(1)
 
 
 def evt(time_run, file_names):
+    print(f"Thời gian chạy xxxxxx là  ============== ", file_names)
     for file_name in file_names:
-        print("check file_name in function ev... ", file_name, " ------------ schedule_time --------------", time_run)
-        schedule.every(int(time_run)).seconds.do(lambda: read_json_file(file_name))
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+        job_with_params = partial(read_json_file, file_name)
+
+        schedule.every(int(time_run)).seconds.do(job_with_params)
+        print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
+        # print(f"Thời gian lần thực thi trước đó của file {file_name} là: {job.last_run}")
+    # schedule.run_all()
+    # schedule.join()
+
 
 
 def evm(time_run, file_names):
     # Lấy tháng hiện tại
     month = datetime.today().month
-    # Lấy số ngày trong tháng hiện tại
-    days_in_month = calendar.monthrange(month, 1)[0]
+    #  Lấy năm hiện tại
+    year = datetime.today().year
+    # Lấy số lượng ngày trong tháng hiện tại
+    days_in_month = calendar.monthrange(year, month)[1]
     day = time_run[:2]
     hour = time_run[3:]
     print(f"====---- day là {day}, hour là {hour} ----====")
@@ -214,8 +240,11 @@ def evm(time_run, file_names):
             day = days_in_month
         else:
             day = day
-    for file_name in file_names:
-        schedule.every().month.day(day).at(hour).do(lambda: read_json_file(file_name))
-    # while True:
-    schedule.run_pending()
-    time.sleep(1)
+        for file_name in file_names:
+            job = schedule.every().month.day(day).at(hour).do(lambda: read_json_file(file_name))
+            print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
+            print(f"Thời gian lần thực thi trước đó của file {file_name} là: {job.last_run}")
+    # while checkDayHHmmss is True:
+    #     for file_name in file_names:
+    #         schedule.run_pending()
+    #         time.sleep(1)
