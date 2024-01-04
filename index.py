@@ -1,6 +1,7 @@
 import json
 import os
 from json import JSONDecodeError
+import requests
 
 from flask import Flask, render_template, request, flash, redirect, url_for, make_response
 
@@ -65,11 +66,28 @@ def form_schedule():
                 }
                 # Ghi dữ liệu JSON vào tệp
                 writeFile(path, data)
+
+
             else:
                 flash("Tên dịch vụ đã tồn tại. Vui lòng nhập lại!", 'error')
                 return redirect('/schedule')
         except JSONDecodeError as e:
-            print("---------JSONDecodeError--------- ", e)
+            # Tạo một đối tượng requests
+            session = requests.Session()
+
+            data_cookies = {
+                "service_name": service_name_request,
+                "config_file": config_file_request,
+                "time_set_hidden": time_set_request
+            }
+            # Đặt một cookie mới
+            session.cookies.set("data_cookies", data_cookies)
+
+            # Gửi một yêu cầu
+            response = session.get("/schedule")
+
+            # Kiểm tra cookie
+            print(response.session.items())
             flash("Nội dung config chưa chính xác, vui lòng kiểm tra lại!!!", 'error')
             # queryString = f'service_name={service_name_request}&config_file={config_file_request}&time_set_hidden={
             # time_set_request}'

@@ -288,6 +288,20 @@
        document.forms[0].submit();
     }
 
+    function sendRequest() {
+      // Tạo một đối tượng XMLHttpRequest
+      var xhr = new XMLHttpRequest();
+
+      // Thiết lập thuộc tính cookie
+      xhr.cookie = {
+        "user_id": "1234567890"
+      };
+
+      // Gửi yêu cầu
+      xhr.open("GET", "https://example.com");
+      xhr.send();
+    }
+
 </script>
 <style>
     body {

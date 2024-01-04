@@ -63,7 +63,7 @@ def read_json_file(json_file):
     global file_path
     globalVal = {}
     # Đọc file json
-    print("0000000000000", json_file)
+    # print("0000000000000", json_file)
 
     with open(json_file, "r") as file:
         data_file_json = json.load(file)
@@ -94,9 +94,9 @@ def read_json_file(json_file):
                     # print("file_path:::::::::::::", file_path)
                     #     Kiểm tra file có tồn tại hay không?
                     if os.path.exists(file_path):
-                        print("The file exists.")
+                        print("The file in json_file exists.")
                     else:
-                        print("The file does not exist.")
+                        print("The file in json_file does not exists.")
         # Thực hiện request
         if method == "POST":
             response_data = _post(url, headers, body)
@@ -108,13 +108,13 @@ def read_json_file(json_file):
             with open(file_path, "rb") as image_file:
                 response_data = _upload_file(url, headers, body, {"file": image_file})
 
-        print("response_data ====== ", response_data)
+        # print("response_data ====== ", response_data)
         #     Thực hiện lấy response trả về "_" và lưu vào globalVal
         if _pr is not None:
             for k, v in _pr.items():
                 # chuyển đổi v thành path để lấy giá trị trong response
                 path = v.replace("$", "")
-                print("v_path  ======", path)
+                # print("v_path  ======", path)
                 value = get_value_by_path(response_data, path)
                 if value is not None:
                     globalVal[k] = value
@@ -123,8 +123,9 @@ def read_json_file(json_file):
 
             # Ghi dữ liệu của "_" vào file myVal.txt
             writeFile("myVal.txt", globalVal)
-        print("SUCCESS!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print(f"Thời gian chạy {json_file} là  ============== ", datetime.now())
+        print()
+        print("SUCCESS!!! - ", f"Thời gian chạy {json_file} là  ====================== ", datetime.now())
+        print()
     return
 
 
@@ -152,7 +153,7 @@ def executeFile():
     for key in dataFile.keys():
         # Kiểm tra chuỗi có đúng định dạng hh:mm:ss hay không
         check = is_time(key)
-        print(f"check format hh:mm:ss của {key} là ::::::: ", check)
+        # print(f"check format hh:mm:ss của {key} là ::: ", check)
         if len(key) == 8 and check is True:
             evd(key, dataFile[key])
         elif "_" in key:
@@ -200,9 +201,10 @@ def evd(time_run, file_names):
     file_name = file_names[0]
     if check is True:
         for file_name in file_names:
+            job_with_params = partial(read_json_file, file_name)
             # kiểm tra thời điểm hiện tại có phải đến giờ thực thi hay không, nếu True thì thực thi
-            job = schedule.every().day.at(time_run).do(lambda: read_json_file(file_name))
-            print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
+            job = schedule.every().day.at(time_run).do(job_with_params)
+            # print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
             print(f"Thời gian lần thực thi trước đó của file {file_name} là: {job.last_run}")
 
     # while True:
@@ -217,11 +219,8 @@ def evt(time_run, file_names):
         job_with_params = partial(read_json_file, file_name)
 
         schedule.every(int(time_run)).seconds.do(job_with_params)
-        print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
+        # print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
         # print(f"Thời gian lần thực thi trước đó của file {file_name} là: {job.last_run}")
-    # schedule.run_all()
-    # schedule.join()
-
 
 
 def evm(time_run, file_names):
@@ -233,7 +232,7 @@ def evm(time_run, file_names):
     days_in_month = calendar.monthrange(year, month)[1]
     day = time_run[:2]
     hour = time_run[3:]
-    print(f"====---- day là {day}, hour là {hour} ----====")
+    # print(f"====---- day là {day}, hour là {hour} ----====")
     checkDayHHmmss = isDayHHmmss(day, hour)
     if checkDayHHmmss is True:
         if int(day) > days_in_month:
@@ -241,10 +240,8 @@ def evm(time_run, file_names):
         else:
             day = day
         for file_name in file_names:
-            job = schedule.every().month.day(day).at(hour).do(lambda: read_json_file(file_name))
-            print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
+            job_with_params = partial(read_json_file, file_name)
+            job = schedule.every().month.day(day).at(hour).do(job_with_params)
+            # print(f"Thời gian chạy {file_name} là  ============== ", datetime.now())
             print(f"Thời gian lần thực thi trước đó của file {file_name} là: {job.last_run}")
-    # while checkDayHHmmss is True:
-    #     for file_name in file_names:
-    #         schedule.run_pending()
-    #         time.sleep(1)
+
