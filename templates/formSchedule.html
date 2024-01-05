@@ -24,12 +24,14 @@
         <div>
             <label>Tên dịch vụ</label>
             <span>
-            <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required />
+                 <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required value="{{ service_name }}"/>
           </span>
             <label> Config </label>
             <span>
+                <textarea name="config_file" id="config_file" rows="36" cols="62" placeholder="Nhập nội dung của bạn trong [...] nhé" required >
+                    {{ config_file }}
 
-            <textarea name="config_file" id="config_file" rows="36" cols="62" placeholder="Nhập nội dung của bạn trong [...] nhé"></textarea>
+                </textarea>
           </span>
         </div>
         <div class="selectTag">
@@ -42,8 +44,11 @@
                 <input type="text" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
                 <input type="text" id="time_set_time" name="time_set_time" placeholder="Nhập thời gian">
             </div>
-
-            <input id="time_set_hidden" name="time_set_hidden" value='{"EVM": [],"EVT":[], "EVD":[]}' hidden="hidden"/>
+            {% if time_set_hidden %}
+                <input id="time_set_hidden" name="time_set_hidden" value='{{ time_set_hidden }}' hidden="hidden"/>
+            {% else %}
+                 <input id="time_set_hidden" name="time_set_hidden" value='{"EVM": [],"EVT":[], "EVD":[]}' hidden="hidden"/>
+            {% endif %}
             <span>
             <input type="button" value="+" onclick="add()"/>
           </span>
@@ -72,7 +77,14 @@
 <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
 <script>
 
-       var arr_data = {"EVM": [],"EVD": [], "EVT": []};
+       //var arr_data = {"EVM": [],"EVD": [], "EVT": []};
+        {% if time_set_hidden %}
+               var arr_data = {{ time_set_hidden }};
+            {% else %}
+                 var arr_data = {"EVM": [],"EVD": [], "EVT": []};
+            {% endif %}
+        var arr_data = {"EVM": [],"EVD": [], "EVT": []};
+        console.log(arr_data)
        // Lấy data đã lưu trước
        time_set_hidden = document.getElementById("time_set_hidden").value;
        time_set_hidden_value = JSON.parse(time_set_hidden);
@@ -130,14 +142,12 @@
              hour = time_set_value.hour;
         }
 
-        // check exists của service_name trước khi save
-        // service_name_value = check_exists_service_name()
-
         // Duyệt qua các key của mảng
         for (var key in arr_data) {
              if (time_set_value !== false && select.value === key) {
                 // Thêm giá trị vào mảng tương ứng
                 arr_data[key].push(time_set_value);
+                document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
              }
 
         }
@@ -197,13 +207,16 @@
                 var index = arr_data["EVD"].indexOf(value);
                 // console.log("xóa ở EVD ... ===> " + arr_data["EVD"])
                 arr_data["EVD"].splice(index, 1);
+                document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
             }else if("Khoảng thời gian giữa 2 lần thực thi (s)" === label){
                 console.log(" xóa ở EVT ... ===> " + arr_data["EVT"])
                 var index = arr_data["EVT"].indexOf(value);
                 arr_data["EVT"].splice(index, 1);
+                document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
             }else {
                 var index = arr_data["EVM"].indexOf(value);
                 arr_data["EVM"].splice(index, 1);
+                document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
             }
 
           // Xóa dòng trong bảng khi click -
@@ -282,25 +295,11 @@
             alert("Bạn phải nhập tên nội dung config trong ngoặc [ ]");
             return false;
         }
-
        document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
        // Gửi form để lưu dữ liệu
        document.forms[0].submit();
     }
 
-    function sendRequest() {
-      // Tạo một đối tượng XMLHttpRequest
-      var xhr = new XMLHttpRequest();
-
-      // Thiết lập thuộc tính cookie
-      xhr.cookie = {
-        "user_id": "1234567890"
-      };
-
-      // Gửi yêu cầu
-      xhr.open("GET", "https://example.com");
-      xhr.send();
-    }
 
 </script>
 <style>

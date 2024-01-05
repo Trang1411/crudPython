@@ -3,7 +3,7 @@ import os
 from json import JSONDecodeError
 import requests
 
-from flask import Flask, render_template, request, flash, redirect, url_for, make_response
+from flask import Flask, render_template, request, flash, redirect, url_for, session
 
 from lib import writeFile, readFileScheduleData, writeFileScheduleData, executeFile
 
@@ -12,19 +12,30 @@ app = Flask(__name__)
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
-    global data, config_file_dict, time_set, service_name_request, config_file_request, \
-        time_set_request, queryString, time_save
+    global data, config_file_dict, time_set, service_name_request, config_file_requests, \
+        time_set_request, time_save
     if request.method == 'POST':
         try:
-            # Lấy thông tin nhập vào từ form
+            # Lấy cookies từ request
+            # cookies = request.cookies
             service_name_request = request.form.get('service_name')
             config_file_requests = request.form.get('config_file')
             time_set_request = request.form.get('time_set_hidden')
+
+            # Lưu thông tin vào cookie\
+            session["service_name"] = service_name_request
+            session["config_file"] = config_file_requests
+            session["time_set_hidden"] = time_set_request
+
             # print("=====time_set_request ==== ", time_set_request)
-            time_set = json.loads(time_set_request)
-            # print(" time_set loads ======== ", time_set)
+            # print(f" config_file_requests ==================== {config_file_requests}")
+            # print(f"file_name ========= {service_name_request} ")
+
+            if time_set_request:  # Kiểm tra xem time_set_request có rỗng không
+                time_set = json.loads(time_set_request)
 
             # lưu dữ liệu form schedule thành file.json
+
             file_name = service_name_request + ".json"
             path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
             # print("path ======== ", path)
@@ -66,33 +77,27 @@ def form_schedule():
                 }
                 # Ghi dữ liệu JSON vào tệp
                 writeFile(path, data)
-
-
             else:
+                session["service_name"] = service_name_request
+                session["config_file"] = config_file_requests
+                session["time_set_hidden"] = time_set_request
+
+                print("cookie service_name =============== ", session.get("service_name"))
+                print(f"cookie config_file ==================== ", session.get("config_file"))
+
                 flash("Tên dịch vụ đã tồn tại. Vui lòng nhập lại!", 'error')
-                return redirect('/schedule')
+                # return redirect('/schedule')
+                return render_template("formSchedule.html",
+                                       service_name=session.get("service_name"),
+                                       config_file=session.get("config_file"),
+                                       time_set_hidden=session.get("time_set_hidden"))
         except JSONDecodeError as e:
-            # Tạo một đối tượng requests
-            session = requests.Session()
-
-            data_cookies = {
-                "service_name": service_name_request,
-                "config_file": config_file_request,
-                "time_set_hidden": time_set_request
-            }
-            # Đặt một cookie mới
-            session.cookies.set("data_cookies", data_cookies)
-
-            # Gửi một yêu cầu
-            response = session.get("/schedule")
-
-            # Kiểm tra cookie
-            print(response.session.items())
             flash("Nội dung config chưa chính xác, vui lòng kiểm tra lại!!!", 'error')
-            # queryString = f'service_name={service_name_request}&config_file={config_file_request}&time_set_hidden={
-            # time_set_request}'
-            return redirect('/schedule')
-
+            # return redirect('/schedule')
+            return render_template("formSchedule.html",
+                                   service_name=session.get("service_name"),
+                                   config_file=session.get("config_file"),
+                                   time_set_hidden=session.get("time_set_hidden"))
     return render_template("formSchedule.html")  # , messages=request.args.get("messages")
 
 
@@ -101,6 +106,3 @@ if __name__ == '__main__':
     app.config['SECRET_KEY'] = SECRET_KEY
     app.secret_key = SECRET_KEY
     app.run(debug=True)
-    # check = True
-    # while check:
-    # executeFile()
