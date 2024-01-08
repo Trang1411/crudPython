@@ -155,11 +155,11 @@ def executeFile():
         check = is_time(key)
         # print(f"check format hh:mm:ss của {key} là ::: ", check)
         if len(key) == 8 and check is True:
-            evd(key, dataFile[key])
+            evd(key, os.path.join("botData", dataFile[key]))
         elif "_" in key:
-            evm(key, dataFile[key])
+            evm(key, os.path.join("botData", dataFile[key]))
         else:
-            evt(key, dataFile[key])
+            evt(key, os.path.join("botData", dataFile[key]))
     while True:
         schedule.run_pending()
         time.sleep(1)

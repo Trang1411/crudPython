@@ -9,7 +9,7 @@
 {% with errors = get_flashed_messages(category_filter=["error"]) %}
 {% if errors %}
 <div class="alert-message block-message error">
-<!--    <a class="close" href="#">×</a>-->
+    <!--    <a class="close" href="#">×</a>-->
     <ul>
         {%- for msg in errors %}
         <li>{{ msg }}</li>
@@ -29,7 +29,8 @@
           </span>
             <label> Config </label>
             <span>
-                <textarea name="config_file" id="config_file" rows="36" cols="60" placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
+                <textarea name="config_file" id="config_file" rows="36" cols="60"
+                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
           </span>
         </div>
         <div class="selectTag">
@@ -133,12 +134,10 @@
      }
    });
 
-
-$(document).on('click', '.delete_btn', function(e){
-     deleteRow(this, event);
-});
-
-
+    //sự kiện onclick chạy trong cả chương trình (bắt đầu -> cookie)
+    $(document).on('click', '.delete_btn', function(e){
+         deleteRow(this, event);
+    });
 
  function add() {
      var input_time_set = document.getElementById("time_set");
@@ -279,32 +278,29 @@ $(document).on('click', '.delete_btn', function(e){
  }
 
  function isConfig(){
-     console.log( "check isConfig" + config_file_value);
-     config_file_content = config_file_value.trim();
+     // console.log( "check isConfig" + config_file_value);
+     config_file_content = config_file_value.replace(/^\s+|\s+$/g, "");
      var firstChar = config_file_content.charAt(0);
+     console.log("firstChar ==== " + firstChar)
      var lastChar = config_file_content.charAt(config_file_content.length - 1);
+     console.log("lastChar ==== " + lastChar)
 
      if (firstChar === "[" && lastChar === "]") {
-       console.log("Chuỗi hợp lệ");
+       //console.log("Chuỗi hợp lệ");
        return true;
      } else {
-       console.log("Chuỗi không hợp lệ");
+       //console.log("Chuỗi không hợp lệ");
        return false;
      }
  }
+
  function save(){
      if (service_name.value === "") {
            alert("Bạn phải nhập tên dịch vụ!");
            return false;
       }
-
-    console.log( "check config in save() ======== " + config_file_value);
-     if (isConfig == false) {
-         alert("Bạn phải nhập tên nội dung config trong ngoặc [ ]");
-         return false;
-     }
-    // Gửi form để lưu dữ liệu
-    document.forms[0].submit();
+     // Gửi form để lưu dữ liệu
+     document.forms[0].submit();
  }
 
 
