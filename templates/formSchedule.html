@@ -6,7 +6,18 @@
 </head>
 
 <body>
-
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="alert-message block-message error">
+<!--    <a class="close" href="#">×</a>-->
+    <ul>
+        {%- for msg in errors %}
+        <li>{{ msg }}</li>
+        {% endfor -%}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
 <div class="content">
     <h1 style="text-align: center;">Form đăng ký</h1>
     <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center" name="myForm">
@@ -18,17 +29,14 @@
           </span>
             <label> Config </label>
             <span>
-                <textarea name="config_file" id="config_file" rows="36" cols="62"
-                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>
-                    {{ config_file }}
-                </textarea>
+                <textarea name="config_file" id="config_file" rows="36" cols="60" placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
           </span>
         </div>
         <div class="selectTag">
             <select id="selectTag" for="time_set">
-                <option value="EVM" name="EVM">Thời gian thức thi hàng tháng</option>
-                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày</option>
-                <option value="EVT" name="EVT">Khoảng thời gian thực thi</option>
+                <option value="EVM" name="EVM">Thời gian thực thi hàng tháng (dd hh:mm:ss)</option>
+                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (hh:mm:ss)</option>
+                <option value="EVT" name="EVT">Khoảng thời gian giữa 2 lần thực thi (s)</option>
             </select>
             <div id="time_set">
                 <input type="text" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
@@ -52,7 +60,7 @@
                         <td>{{item}}
                             <input name="evm[]" type="hidden" value="{{item}}"></td>
                         <td>
-                            <button>-</button>
+                            <div class="delete_btn">-</div>
                         </td>
                     </tr>
                     {% endfor -%}
@@ -65,7 +73,7 @@
                         <td>{{item}}
                             <input name="evd[]" type="hidden" value="{{item}}"></td>
                         <td>
-                            <button>-</button>
+                            <div class="delete_btn">-</div>
                         </td>
                     </tr>
                     {% endfor -%}
@@ -78,7 +86,7 @@
                         <td>{{item}}
                             <input name="evt[]" type="hidden" value="{{item}}"></td>
                         <td>
-                            <button>-</button>
+                            <div class="delete_btn">-</div>
                         </td>
                     </tr>
                     {% endfor -%}
@@ -112,11 +120,6 @@
      var time_set_day = document.getElementById("time_set_day");
      var time_set_time = document.getElementById("time_set_time");
 
-    // Lấy giá trị của input time_set theo mảng
-    evt = document.getElementsByName("evt[]");
-    evd = document.getElementsByName("evd[]");
-    evm = document.getElementsByName("evm[]");
-
    $('#selectTag').change(function(){
      var select_value = $(this).val();
      if(select_value === 'EVM'){
@@ -129,6 +132,13 @@
 
      }
    });
+
+
+$(document).on('click', '.delete_btn', function(e){
+     deleteRow(this, event);
+});
+
+
 
  function add() {
      var input_time_set = document.getElementById("time_set");
@@ -184,14 +194,15 @@
             cell2.innerHTML = time_set_value + '<input name="evt[]" type= "hidden" value ="' + time_set_value +'"/>';
          }
          // Thêm nút xóa ở mỗi dòng trong bảng
-         var deleteButton = document.createElement("button");
-         deleteButton.innerHTML = "-";
-         deleteButton.onclick = function () {
-           deleteRow(this, event);
-         };
-         cell3.appendChild(deleteButton);
+
+         cell3.innerHTML ='<div class= "delete_btn">-</div>';
      }
  }
+
+  // Lấy giá trị của input time_set theo mảng
+    evt = Array.from(document.getElementsByName("evt[]"));
+    evd = Array.from(document.getElementsByName("evd[]"));
+    evm = Array.from(document.getElementsByName("evm[]"));
 
  function deleteRow(button, event) {
      // Check if the pointerType is not an empty string before proceeding
@@ -204,7 +215,7 @@
          console.log("key-value muốn delete ===>> " + label + " - " + value);
 
         // xóa phần tử trong mảng khi -
-         if ("Thời gian thực thi trong ngày (HH:mm:ss)" === label){
+         if ("Thời gian thực thi hàng ngày (hh:mm:ss)" === label){
              var index = evd.indexOf(value);
              evd.splice(index, 1);
          }else if("Khoảng thời gian giữa 2 lần thực thi (s)" === label){
@@ -252,7 +263,7 @@
      if((select_value === "EVM" &&  (is_hour.isValid() == false || is_day == false)) || (select_value === "EVT" && !isInteger) || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
          // input_time_set.validationMessage = "Input không hợp lệ";
          alert("Giá trị nhập vào không hợp lệ!!!")
-         console.log("Giá 0000 trị hợp lệ");
+         console.log("Giá trị 0000 hợp lệ");
          return false;
      }else{
          // Dữ liệu đầu vào hợp lệ
@@ -268,6 +279,7 @@
  }
 
  function isConfig(){
+     console.log( "check isConfig" + config_file_value);
      config_file_content = config_file_value.trim();
      var firstChar = config_file_content.charAt(0);
      var lastChar = config_file_content.charAt(config_file_content.length - 1);
@@ -286,11 +298,11 @@
            return false;
       }
 
+    console.log( "check config in save() ======== " + config_file_value);
      if (isConfig == false) {
          alert("Bạn phải nhập tên nội dung config trong ngoặc [ ]");
          return false;
      }
-    document.getElementById("time_set_hidden").value = JSON.stringify(arr_data);
     // Gửi form để lưu dữ liệu
     document.forms[0].submit();
  }
