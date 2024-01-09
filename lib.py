@@ -1,16 +1,14 @@
+import calendar
 import glob
+import json
+import os
+import re
+import time
+from datetime import datetime
 from functools import partial
 
 import requests
 import schedule
-import time
-import json
-import os
-import calendar
-import re
-import logging
-
-from datetime import datetime
 
 
 def _post(url, headers, body):

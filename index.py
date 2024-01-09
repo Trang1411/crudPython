@@ -1,14 +1,16 @@
 import json
 import os
 from json import JSONDecodeError
-import requests
 
-from flask import Flask, render_template, request, flash, redirect, url_for, session
+from flask import Flask, render_template, request, flash, session
 
-from lib import writeFile, readFileScheduleData, writeFileScheduleData, executeFile
+from lib import writeFile, readFileScheduleData, writeFileScheduleData
 
 app = Flask(__name__)
 
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return render_template("index.html")
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def form_schedule():
@@ -141,6 +143,7 @@ def search_service():
 def delete_service():
     if request.method == 'POST':
         file_del = request.form.get("file_del")
+        print(f" ================ want delete file {file_del}")
         os.remove(file_del)
     return render_template("deleteService.html")
 

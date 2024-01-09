@@ -5,7 +5,20 @@
     <title>Get all service</title>
 </head>
 <body>
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="alert-message block-message error">
+    <!--    <a class="close" href="#">×</a>-->
+    <ul>
+        {%- for msg in errors %}
+        <li>{{ msg }}</li>
+        {% endfor -%}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
 <div>
+    <h2>Danh sách các dịch vụ</h2>
     <div>
         <button class="button" data-modal="3" onclick="openFormSearch()">Tìm kiếm</button>
     </div>
@@ -43,17 +56,16 @@
             </tbody>
         </table>
     </div>
-    <button class="button" data-modal="4"><a href="formSchedule.html">Thêm</a></button>
+    <button class="button" data-modal="4"><a href="/schedule">Thêm</a></button>
     <button onclick="/">Thoát</button>
 </div>
-
 
 <div class="modal" id="popupFormSearch">
     <div class="modal-inner">
         <span class="close">&times;</span>
         <h2> Thông tin tìm kiếm </h2>
         <center>
-            <form method="POST" action="search()" id="formSearch">
+            <form method="POST" action="javascript:search()" id="formSearch">
                 <h4 for="searchName">Mời nhập tên dịch vụ</h4> <br>
                 <input type="text" id="searchName" name="searchName">
                 <br/><br/>
@@ -71,10 +83,8 @@
             <div>
                 <label>
                     <table id="dataTable" style="text-align: left; width: 800px">
-                        <tr>
-                            <th></th>
-                            <th></th>
-                        </tr>
+                        <th></th>
+                        <th></th>
                     </table>
                 </label>
             </div>
@@ -87,60 +97,68 @@
         <span class="close">&times;</span>
         <h2> Bạn chắc chắn muốn xóa? </h2>
         <center>
-            <form method="POST" action="deleteService()" id="formDelete">
+            <form method="POST" action="javascript:deleteService()" id="formDelete">
                 <div class="btn">
                     <button onsubmit="/deleteService"><h3>Xóa</h3></button>
                 </div>
             </form>
         </center>
     </div>
-
 </div>
 </body>
 </html>
+
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 <script>
-    function openFormSearch() {
-         document.getElementById("popupFormSearch").style.display = "block";
+    $('.close').click(function() {
+        // event handling
+         $( ".modal" ).css("display", "none");
+        });
+
+   function openFormSearch() {
+        document.getElementById("popupFormSearch").style.display = "block";
+        document.getElementById("resultSearch").style.display = "none";
    }
 
-   function openResultSearch(){
-       document.getElementById("resultSearch").style.display = "block";
-   }
+  function openResultSearch(){
+      document.getElementById("resultSearch").style.display = "block";
+  }
 
-   function openFormDelete(service_name) {
-       document.getElementById("popupFormDelete").style.display = "block";
-       names = service_name;
-   }
+    let names = []
+  function openFormDelete(service_name) {
+      document.getElementById("popupFormDelete").style.display = "block";
+      names = service_name;
+  }
 
-   function search(){
-       var service_name = document.getElementById("searchName").value;
-       alert("tên dịch vụ tìm kiếm là " + service_name);
-       $.ajax({
-           method: "POST",
-           url: "/searchService",
-           data: { service_name }
-       })
-       .done(function(rs) {
-               var data = JSON.parse(rs);
-               alert(data.service_name)
-               alert("done ==== " + rs );
-               // gọi đến resultSearch
-             });
-   }
+  function search(){
+      var service_name = document.getElementById("searchName").value;
+      alert("tên dịch vụ tìm kiếm là " + service_name);
+      $.ajax({
+          method: "POST",
+          url: "/searchService",
+          data: { service_name }
+      })
+      .done(function(rs) {
+              var data = JSON.parse(rs);
+              alert(data.service_name)
+              alert("done ==== " + rs );
+              // gọi đến resultSearch
+            });
+  }
 
-    function deleteService(){
-       $.ajax({
-           type: "POST",
-           url: "/deleteService",
-           data: { service_name }
-       })
-       .done(function(msg){
-           alert("Data delete success!!!!!!!!!!!");
-           //Tải lại trang
-           $('#formDelete');
-           location.reload();
-       });
-    }
+   function deleteService(){
+      $.ajax({
+          type: "POST",
+          url: "/deleteService",
+          data: { service_name }
+      })
+      .done(function(msg){
+          alert("Data delete success!!!!!!!!!!!");
+          //Tải lại trang
+          $('#formDelete');
+          location.reload();
+      });
+   }
 </script>
 
 <style>
