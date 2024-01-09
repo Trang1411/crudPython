@@ -64,8 +64,8 @@ def read_json_file(json_file):
     globalVal = {}
     # Đọc file json
     # print("0000000000000", json_file)
-
-    with open(json_file, "r") as file:
+    path = os.path.join("botData", json_file)
+    with open(path, "r") as file:
         data_file_json = json.load(file)
 
     # print("======================>> ", type(data_file_json))
@@ -155,11 +155,11 @@ def executeFile():
         check = is_time(key)
         # print(f"check format hh:mm:ss của {key} là ::: ", check)
         if len(key) == 8 and check is True:
-            evd(key, os.path.join("botData", dataFile[key]))
+            evd(key, dataFile[key])
         elif "_" in key:
-            evm(key, os.path.join("botData", dataFile[key]))
+            evm(key, dataFile[key])
         else:
-            evt(key, os.path.join("botData", dataFile[key]))
+            evt(key, dataFile[key])
     while True:
         schedule.run_pending()
         time.sleep(1)
@@ -178,7 +178,7 @@ def isHHmmss(time_set_value):
     # chuyển str time_set_value thành thời gian
     time_set_value = datetime.strptime(time_set_value, "%H:%M:%S")
     # So sánh với giờ time_set_value
-    if now.hour == time_set_value.hour and now.minute == time_set_value.minute and now.second == time_set_value.second:
+    if now.hour == time_set_value.hour and now.minute == time_set_value.minute:
         return True
     else:
         return False
@@ -198,8 +198,8 @@ def isDayHHmmss(day, hhmmss):
 # Nếu đến rôi thì thực hiện tác vụ và xóa nó khỏi hàng đợi
 def evd(time_run, file_names):
     check = isHHmmss(time_run)
-    file_name = file_names[0]
     if check is True:
+        print(f"EVD ============== ", file_names)
         for file_name in file_names:
             job_with_params = partial(read_json_file, file_name)
             # kiểm tra thời điểm hiện tại có phải đến giờ thực thi hay không, nếu True thì thực thi
@@ -214,7 +214,7 @@ def evd(time_run, file_names):
 
 
 def evt(time_run, file_names):
-    print(f"Thời gian chạy xxxxxx là  ============== ", file_names)
+    print(f"EVT ============== ", file_names)
     for file_name in file_names:
         job_with_params = partial(read_json_file, file_name)
 
@@ -239,6 +239,7 @@ def evm(time_run, file_names):
             day = days_in_month
         else:
             day = day
+        print(f"EVM ============== ", file_names)
         for file_name in file_names:
             job_with_params = partial(read_json_file, file_name)
             job = schedule.every().month.day(day).at(hour).do(job_with_params)

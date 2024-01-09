@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Get all service</title>
+</head>
+<body>
+<div>
+    <div>
+        <button class="button" data-modal="3" onclick="openFormSearch()">Tìm kiếm</button>
+    </div>
+    <div>
+        <table>
+            <thead>
+            <colgroup>
+                <col width="70%">
+                <col width="15%">
+                <col width="15%">
+            </colgroup>
+            <tr>
+                <th>Tên dịch vụ</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for file in files %}
+            <tr>
+                <td>{{ file }}</td>
+                <td>
+                    <button type="button" class="btn btn-success button" data-toggle="modal"
+                            data-modal="1"
+                            onclick="openFormUpdate({{ file }})">Sửa
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger button" data-toggle="modal"
+                            data-modal="2" onclick="openFormDelete({{ file }})">Xóa
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button class="button" data-modal="4"><a href="formSchedule.html">Thêm</a></button>
+    <button onclick="/">Thoát</button>
+</div>
+
+
+<div class="modal" id="popupFormSearch">
+    <div class="modal-inner">
+        <span class="close">&times;</span>
+        <h2> Thông tin tìm kiếm </h2>
+        <center>
+            <form method="POST" action="search()" id="formSearch">
+                <h4 for="searchName">Mời nhập tên dịch vụ</h4> <br>
+                <input type="text" id="searchName" name="searchName">
+                <br/><br/>
+                <button onsubmit="/searchService" onclick="openResultSearch()">Tìm kiếm</button>
+            </form>
+        </center>
+
+        <div id="resultSearch">
+            <div>
+                <label>Tên dịch vụ</label>
+                <span><label></label></span>
+                <label> Config </label>
+                <span><textarea></textarea></span>
+            </div>
+            <div>
+                <label>
+                    <table id="dataTable" style="text-align: left; width: 800px">
+                        <tr>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </table>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="popupFormDelete">
+    <div class="modal-inner">
+        <span class="close">&times;</span>
+        <h2> Bạn chắc chắn muốn xóa? </h2>
+        <center>
+            <form method="POST" action="deleteService()" id="formDelete">
+                <div class="btn">
+                    <button onsubmit="/deleteService"><h3>Xóa</h3></button>
+                </div>
+            </form>
+        </center>
+    </div>
+
+</div>
+</body>
+</html>
+<script>
+    function openFormSearch() {
+         document.getElementById("popupFormSearch").style.display = "block";
+   }
+
+   function openResultSearch(){
+       document.getElementById("resultSearch").style.display = "block";
+   }
+
+   function openFormDelete(service_name) {
+       document.getElementById("popupFormDelete").style.display = "block";
+       names = service_name;
+   }
+
+   function search(){
+       var service_name = document.getElementById("searchName").value;
+       alert("tên dịch vụ tìm kiếm là " + service_name);
+       $.ajax({
+           method: "POST",
+           url: "/searchService",
+           data: { service_name }
+       })
+       .done(function(rs) {
+               var data = JSON.parse(rs);
+               alert(data.service_name)
+               alert("done ==== " + rs );
+               // gọi đến resultSearch
+             });
+   }
+
+    function deleteService(){
+       $.ajax({
+           type: "POST",
+           url: "/deleteService",
+           data: { service_name }
+       })
+       .done(function(msg){
+           alert("Data delete success!!!!!!!!!!!");
+           //Tải lại trang
+           $('#formDelete');
+           location.reload();
+       });
+    }
+</script>
+
+<style>
+    table {
+          width: 300px;
+         border: 1px solid black;
+    }
+    th, td {
+        text-align: center
+        border: 1px solid grey;
+        border: 1px solid grey;
+        padding: 5px;
+    }
+    col-group {
+        column-width: 70%;
+    }
+    .popup {
+     display: none;
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     width: 300px;
+     height: 150px;
+     background-color: #fff;
+     padding: 20px;
+     border: 1px solid #ccc;
+     z-index: 10;
+   }
+   .popup form {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+    }
+    .modal{
+     display:none;
+   }
+
+   .modal{
+     position: fixed;
+     top:0;
+     left:0;
+     right:0;
+     bottom:0;
+     padding-top: 100px;
+     background:rgba(0,0,0,0.65);
+   }
+   .modal-inner{
+     background:#fff;
+     width:70%;
+     margin:auto;
+     padding:1rem;
+   }
+   .modal-inner h2, .modal-inner p{
+     text-align:center;
+   }
+
+   .close{
+     color: #aaaaaa;
+     float: right;
+     font-size: 1.75rem;
+     font-weight: bold;
+   }
+
+   .close:hover{
+     color: #000;
+     text-decoration: none;
+     cursor: pointer;
+   }
+    .open{
+     height:100vh;
+     overflow-y:hidden;
+   }
+</style>

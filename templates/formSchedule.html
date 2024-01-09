@@ -102,8 +102,6 @@
 
     </form>
 </div>
-
-
 </body>
 
 </html>
@@ -162,9 +160,14 @@
      }
 
      //check trc khi push
+     var day, hour
      time_set_value = check_time_set(select.value, time_set_value);
      if(select.value === "EVM" && time_set_value !== false){
-          day = time_set_value.day;
+          if(time_set_value.day.length === 1){
+            day = "0" + time_set_value.day;
+          }else{
+            day = time_set_value.day;
+          }
           hour = time_set_value.hour;
      }
 
@@ -181,7 +184,7 @@
      if(time_set_value !== false){
          if(select.value === "EVM"){
          cell1.innerHTML = "Thời gian thực thi hàng tháng (dd hh:mm:ss)";
-         cell2.innerHTML = time_set_value.day + ' ' + time_set_value.hour +  '<input name="evm[]" type= "hidden" value ="'+ time_set_value.day + ' ' + time_set_value.hour +'"/>' ;
+         cell2.innerHTML = day + ' ' + hour +  '<input name="evm[]" type= "hidden" value ="'+ day + ' ' + hour +'"/>' ;
 
          }else if(select.value === "EVD"){
             if(!moment(time_set_value).isValid()){
@@ -339,13 +342,15 @@
         justify-content: left;
     }
 
-    button {
+    .delete_btn {
         background-color: #dc3545;
         color: #fff;
         border: none;
-        padding: 6px 10px;
+        padding: 2px 5px;
         cursor: pointer;
         border-radius: 4px;
+        text-align: center;
+        font: 16;
     }
 
     button[type="submit"] {

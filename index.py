@@ -63,7 +63,6 @@ def form_schedule():
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
 
-
         # nếu tên dịch vụ (đường dẫn) đã tồn tại -> thông báo lỗi
         if os.path.exists(path):
             session["service_name"] = service_name_request
@@ -89,9 +88,7 @@ def form_schedule():
                             if key == "EVM":
                                 # print("TYPE value of evm ", type(ts))
                                 d = ts[:2]
-                                if len(d) == 1:
-                                    d = "0" + d
-                                h = ts[2:]
+                                h = ts[3:]
                                 time_save = d + "_" + h
                                 print("sau định dạng của EVM ============ ", time_save)
                             # duyệt mảng giá trị của key và check với scheduleData, nếu key = EVM thì thay đổi định dạng
@@ -113,6 +110,39 @@ def form_schedule():
                 # Ghi dữ liệu JSON vào tệp
                 writeFile(path, data)
     return render_template("formSchedule.html")  # , messages=request.args.get("messages")
+
+
+@app.route('/getAllService', methods=['GET'])
+def get_all_service():
+    global files
+    if request.method == 'GET':
+        path = "botData"
+        files = os.listdir(path)
+        # print(f"TYPE của files ===== {type(files)}")
+        # print(f"Các file trong fiels là : {files}")
+    return render_template("getAllService.html", files=files)
+
+
+@app.route('/searchService', methods=['GET', 'POST'])
+def search_service():
+    if request.method == "POST":
+        key_search = request.form.get("service_name")
+        if os.path.exists(key_search):
+            with open(key_search, "r") as rf:
+                result_search = json.load(rf)
+            print(f"this is data search ========= {result_search}")
+        else:
+            flash("Tên dịch vụ không tồn tại. Vui lòng kiểm tra lại!", 'error')
+            return render_template("getAllService.html")
+    return json.dumps(result_search)
+
+
+@app.route('/deleteService', methods=['GET', 'POST'])
+def delete_service():
+    if request.method == 'POST':
+        file_del = request.form.get("file_del")
+        os.remove(file_del)
+    return render_template("deleteService.html")
 
 
 if __name__ == '__main__':
