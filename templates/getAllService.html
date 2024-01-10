@@ -6,6 +6,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
+
 </head>
 <body>
 {% with errors = get_flashed_messages(category_filter=["error"]) %}
@@ -79,45 +80,72 @@
         <div id="resultSearch">
             <div>
                 <label>Tên dịch vụ: </label>
-                <span><label class="service-name"></label></span> <br>
+                <span><label class="service-name-search"></label></span> <br>
                 <label>Token telegram: </label>
-                <span><label class="token-telegram"></label></span> <br>
+                <span><label class="token-telegram-search"></label></span> <br>
                 <label>Mã nhóm: </label>
-                <span><label class="group-id"></label></span> <br>
+                <span><label class="group-id-search"></label></span> <br>
                 <label> Config: </label> <br>
-                <textarea class="config" rows="28" cols="90" readonly></textarea>
+                <textarea class="config-search" rows="28" cols="90" readonly></textarea>
             </div>
             <br>
             <div>
                 <label>
-                    <table class="dataTable">
+                    <table class="dataTable-search">
 
                     </table>
                 </label>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal popupDelete" id="popupFormDelete">
-        <div class="modal-inner">
-            <span class="close">&times;</span>
-            <h2> Bạn chắc chắn muốn xóa? </h2>
-            <center>
-                <form method="POST" action="javascript:deleteService()" id="formDelete">
-                    <div class="btn">
-                        <button onsubmit="/deleteService"><h3>Xóa</h3></button>
-                    </div>
-                </form>
-            </center>
+<div class="modal popupDelete" id="popupFormDelete">
+    <div class="modal-inner">
+        <span class="close">&times;</span>
+        <h2> Bạn chắc chắn muốn xóa? </h2>
+        <center>
+            <form method="POST" action="javascript:deleteService()" id="formDelete">
+                <div class="btn">
+                    <button onsubmit="/deleteService"><h3>Xóa</h3></button>
+                </div>
+            </form>
+        </center>
+    </div>
+</div>
+
+<div class="modal popupUpdate" id="popupFormUpdate">
+    <div class="modal-inner">
+        <span class="close">&times;</span>
+        <h2> Thông tin dịch vụ</h2>
+        <div id="contentUpdate">
+            <div>
+                <label>Tên dịch vụ: </label>
+                <span><input class="service-name-ud"></span> <br>
+                <label>Token telegram: </label>
+                <span><input class="token-telegram-ud"></span> <br>
+                <label>Mã nhóm: </label>
+                <span><input class="group-id-ud"></span> <br>
+                <label> Config: </label> <br>
+                <textarea class="config" rows="28" cols="90"></textarea>
+            </div>
+            <br>
+            <div>
+                <label>
+                    <table class="dataTable-ud">
+
+                    </table>
+                </label>
+            </div>
         </div>
     </div>
 </div>
 </body>
 </html>
 
-<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
     $('.close').click(function() {
         // event handling
@@ -149,14 +177,14 @@
       })
       .done(function(rs) {
            var data = JSON.parse(rs);
-           $(".service-name").text(data.service_name)
-           $(".token-telegram").text(data.token_telegram)
-           $(".group-id").text(data.group_id)
+           $(".service-name-search").text(data.service_name)
+           $(".token-telegram-search").text(data.token_telegram)
+           $(".group-id-search").text(data.group_id)
            let convertString = "";
            data.config_file.forEach(function(item) {
                 convertString += JSON.stringify(item)
            })
-           $(".config").val(convertString)
+           $(".config-search").val(convertString)
            var convertHtml = "";
 
            if("EVD" in data.time_set){
@@ -185,17 +213,12 @@
                     convertHtml += "</tr>"
                })
            }
-           $(".dataTable").html(convertHtml)
+           $(".dataTable-search").html(convertHtml)
       });
-  }
-
-  function updateService(){
-
   }
 
    function deleteService(){
     var service_name = names;
-
       $.ajax({
           type: "POST",
           url: "/deleteService",
@@ -207,6 +230,18 @@
           $('#formDelete');
           location.reload();
       });
+   }
+
+ function openFormUpdate(service_name) {
+       $(".popupUpdate").css("display", "block");
+       names = service_name
+       // lấy ra thông tin theo service_name cần update
+       $.ajax({
+          method: "POST",
+          url: "/searchService",
+          data: { names }
+      })
+
    }
 
     function locationFormSchedule(){
