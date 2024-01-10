@@ -2,7 +2,7 @@ import json
 import os
 from json import JSONDecodeError
 
-from flask import Flask, render_template, request, flash, session
+from flask import Flask, render_template, request, flash, session, redirect
 
 from lib import writeFile, readFileScheduleData, writeFileScheduleData
 
@@ -19,6 +19,8 @@ def form_schedule():
     if request.method == 'POST':
 
         # Lấy thông tin từ request
+        token_telegram_request = request.form.get("token_telegram")
+        group_id_request = request.form.get("group_id")
         service_name_request = request.form.get('service_name')
         config_file_requests = request.form.get('config_file')
         evd = request.form.getlist('evd[]')
@@ -27,6 +29,8 @@ def form_schedule():
 
         # Lưu thông tin vào cookie
         session["service_name"] = service_name_request
+        session["token_telegram"] = token_telegram_request
+        session["group_id"] = group_id_request
         session["config_file"] = config_file_requests
         session["evd"] = evd
         session["evt"] = evt
@@ -55,6 +59,8 @@ def form_schedule():
                 flash("Bạn chưa nhập nội dung config, vui lòng kiểm tra lại!!!", 'error')
                 return render_template("formSchedule.html",
                                        service_name=session.get("service_name"),
+                                       token_telegram=session.get("token_telegram"),
+                                       group_id=session.get("group_id"),
                                        config_file=session.get("config_file"),
                                        evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
         except JSONDecodeError as e:
@@ -62,6 +68,8 @@ def form_schedule():
             flash("Nội dung config chưa chính xác, vui lòng kiểm tra lại!!!", 'error')
             return render_template("formSchedule.html",
                                    service_name=session.get("service_name"),
+                                   token_telegram=session.get("token_telegram"),
+                                   group_id=session.get("group_id"),
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
 
@@ -77,6 +85,8 @@ def form_schedule():
             # return redirect('/schedule')
             return render_template("formSchedule.html",
                                    service_name=session.get("service_name"),
+                                   token_telegram=session.get("token_telegram"),
+                                   group_id=session.get("group_id"),
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
         #  Ngược lại, tên dịch vụ chưa tồn tại -> thêm
@@ -106,6 +116,8 @@ def form_schedule():
                             writeFileScheduleData(old)
                 data = {
                     "service_name": service_name_request,
+                    "token_telegram": token_telegram_request,
+                    "group_id": group_id_request,
                     "config_file": config_file_dicts,
                     "time_set": time_set
                 }
@@ -127,17 +139,43 @@ def get_all_service():
 
 @app.route('/searchService', methods=['GET', 'POST'])
 def search_service():
+    global key_search
+    result_search = None
     if request.method == "POST":
         key_search = request.form.get("service_name")
-        if os.path.exists(key_search):
-            with open(key_search, "r") as rf:
-                result_search = json.load(rf)
-            print(f"this is data search ========= {result_search}")
+        key_search = key_search + ".json"
+        path = os.path.join("botData", key_search)  # tạo đường dẫn chuẩn
+        if os.path.exists(path):
+            with open(path, "r") as rf:
+                result_search_dict = json.load(rf)
+            # print(f"this is data search ========= {result_search_dict}")
+            result_search = json.dumps(result_search_dict)
+            return result_search
+    return result_search
+
+
+@app.route('/updateService', methods=['GET', 'POST'])
+def update_service():
+    if request.method == "POST":
+        name_update = request.form.get("service_name_update")
+        config_update = request.form.get("config_file_update")
+        evd = request.form.getlist('evd[]')
+        evt = request.form.getlist('evt[]')
+        evm = request.form.getlist('evm[]')
+
+        name_search = request.form.get("service_name")
+        name_search = name_search + ".json"
+        path = os.path.join("botData", name_search)  # tạo đường dẫn chuẩn
+        if os.path.exists(path):
+            with open(path, "r") as rf:
+                result_search_dict = json.load(rf)
+            print(f"this is data search ========= {result_search_dict}")
+            result_search = json.dumps(result_search_dict)
+            return result_search
         else:
             flash("Tên dịch vụ không tồn tại. Vui lòng kiểm tra lại!", 'error')
-            return render_template("getAllService.html")
-    return json.dumps(result_search)
-
+            return redirect("/getAllService")
+    return result_search
 
 @app.route('/deleteService', methods=['GET', 'POST'])
 def delete_service():

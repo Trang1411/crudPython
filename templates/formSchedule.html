@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Form Schedule</title>
+<!--    <link rel="stylesheet" href="../styles.css" />-->
 </head>
 
 <body>
@@ -22,10 +23,21 @@
     <h1 style="text-align: center;">Form đăng ký</h1>
     <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center" name="myForm">
         <div>
+
             <label>Tên dịch vụ</label>
             <span>
                  <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required
                         value="{{ service_name }}"/>
+          </span>
+            <label>Token telegram</label>
+            <span>
+                 <input id="token_telegram" name="token_telegram" type="text" placeholder="Nhập token telegram" required
+                        value="{{ token_telegram }}"/>
+          </span>
+            <label>Mã nhóm</label>
+            <span>
+                 <input id="group_id" name="group_id" type="text" placeholder="Nhập mã nhóm của bạn" required
+                        value="{{ group_id }}"/>
           </span>
             <label> Config </label>
             <span>
@@ -49,8 +61,8 @@
         </div>
         <div style="padding-top: 30px;">
             <button type="submit" onclick="save()">Lưu</button>
+            <div class="btn" onclick="locationGetAll()" style="width: 63.77px; height: 35px;">Thoát</div>
         </div>
-        <div class="btn"><a href="/">Thoát</a></div>
 
         <div>
             <label>
@@ -100,15 +112,19 @@
                 </table>
             </label>
         </div>
-
     </form>
 </div>
 </body>
-
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
 <script>
+    // Lấy token telegram
+    var token_telegram = document.getElementById("token_telegram");
+
+    //Lấy group id
+    var group_id = document.getElementById("group_id");
+
     // lấy service_name
     service_name = document.getElementById("service_name");
 
@@ -298,19 +314,35 @@
      }
  }
 
+function isTextInput(){
+    if(group_id.trim() === "" || token_telegram.trim() ===""){
+        return false;
+    }else {
+        return true;
+    }
+}
+
+
  function save(){
      if (service_name.value === "") {
            alert("Bạn phải nhập tên dịch vụ!");
            return false;
       }
+
+     if (isTextInput === false) {
+         alert("Không được để trống hoặc chỉ nhập khoẳng trắng!!!")
+         return false
+     }
      // Gửi form để lưu dữ liệu
      document.forms[0].submit();
  }
-
+ function locationGetAll(){
+        window.location = "/getAllService";
+    }
 
 </script>
 <style>
-    body {
+     body {
          height: 250px;
          width: 568px;
          padding-top: 50px;
@@ -366,16 +398,11 @@
     .btn {
         background-color: red;
         color: #fff;
-        padding: 10px 20px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        border: none;
-        padding: 2px 5px;
-        cursor: pointer;
-        border-radius: 4px;
         text-align: center;
-        font: 16;
+        font-size: 10;
     }
 
     select {

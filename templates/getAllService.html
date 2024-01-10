@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Get all service</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
 </head>
 <body>
 {% with errors = get_flashed_messages(category_filter=["error"]) %}
@@ -17,10 +20,10 @@
 </div>
 {% endif %}
 {% endwith %}
-<div>
+<div class="content">
     <h2>Danh sách các dịch vụ</h2>
     <div>
-        <button class="button" data-modal="3" onclick="openFormSearch()">Tìm kiếm</button>
+        <button class="button" data-modal="3" onclick="javascript:openFormSearch()">Tìm kiếm</button>
     </div>
     <div>
         <table>
@@ -39,16 +42,16 @@
             <tbody>
             {% for file in files %}
             <tr>
-                <td>{{ file }}</td>
+                <td>{{ file.replace(".json", "") }}</td>
                 <td>
                     <button type="button" class="btn btn-success button" data-toggle="modal"
                             data-modal="1"
-                            onclick="openFormUpdate({{ file }})">Sửa
+                            onclick='openFormUpdate("{{ file }}")'>Sửa
                     </button>
                 </td>
                 <td>
                     <button type="button" class="btn btn-danger button" data-toggle="modal"
-                            data-modal="2" onclick="openFormDelete({{ file }})">Xóa
+                            data-modal="2" onclick='openFormDelete("{{ file }}")'>Xóa
                     </button>
                 </td>
             </tr>
@@ -56,7 +59,7 @@
             </tbody>
         </table>
     </div>
-    <button class="button" data-modal="4"><a href="/schedule">Thêm</a></button>
+    <button class="button" data-modal="4" onclick="javascript:locationFormSchedule()">Thêm</button>
     <button onclick="/">Thoát</button>
 </div>
 
@@ -75,40 +78,46 @@
 
         <div id="resultSearch">
             <div>
-                <label>Tên dịch vụ</label>
-                <span><label></label></span>
-                <label> Config </label>
-                <span><textarea></textarea></span>
+                <label>Tên dịch vụ: </label>
+                <span><label class="service-name"></label></span> <br>
+                <label>Token telegram: </label>
+                <span><label class="token-telegram"></label></span> <br>
+                <label>Mã nhóm: </label>
+                <span><label class="group-id"></label></span> <br>
+                <label> Config: </label> <br>
+                <textarea class="config" rows="28" cols="90" readonly></textarea>
             </div>
+            <br>
             <div>
                 <label>
-                    <table id="dataTable" style="text-align: left; width: 800px">
-                        <th></th>
-                        <th></th>
+                    <table class="dataTable">
+
                     </table>
                 </label>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal" id="popupFormDelete">
-    <div class="modal-inner">
-        <span class="close">&times;</span>
-        <h2> Bạn chắc chắn muốn xóa? </h2>
-        <center>
-            <form method="POST" action="javascript:deleteService()" id="formDelete">
-                <div class="btn">
-                    <button onsubmit="/deleteService"><h3>Xóa</h3></button>
-                </div>
-            </form>
-        </center>
+    <div class="modal popupDelete" id="popupFormDelete">
+        <div class="modal-inner">
+            <span class="close">&times;</span>
+            <h2> Bạn chắc chắn muốn xóa? </h2>
+            <center>
+                <form method="POST" action="javascript:deleteService()" id="formDelete">
+                    <div class="btn">
+                        <button onsubmit="/deleteService"><h3>Xóa</h3></button>
+                    </div>
+                </form>
+            </center>
+        </div>
     </div>
 </div>
 </body>
 </html>
 
 <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script>
     $('.close').click(function() {
         // event handling
@@ -124,57 +133,116 @@
       document.getElementById("resultSearch").style.display = "block";
   }
 
-    let names = []
+  let names = []
   function openFormDelete(service_name) {
-      document.getElementById("popupFormDelete").style.display = "block";
+       $( ".popupDelete" ).css("display", "block");
+
       names = service_name;
   }
 
   function search(){
       var service_name = document.getElementById("searchName").value;
-      alert("tên dịch vụ tìm kiếm là " + service_name);
       $.ajax({
           method: "POST",
           url: "/searchService",
           data: { service_name }
       })
       .done(function(rs) {
-              var data = JSON.parse(rs);
-              alert(data.service_name)
-              alert("done ==== " + rs );
-              // gọi đến resultSearch
-            });
+           var data = JSON.parse(rs);
+           $(".service-name").text(data.service_name)
+           $(".token-telegram").text(data.token_telegram)
+           $(".group-id").text(data.group_id)
+           let convertString = "";
+           data.config_file.forEach(function(item) {
+                convertString += JSON.stringify(item)
+           })
+           $(".config").val(convertString)
+           var convertHtml = "";
+
+           if("EVD" in data.time_set){
+                data.time_set.EVD.forEach(function(item) {
+                    convertHtml += "<tr>"
+                    convertHtml += `<td> Thời gian thực thi hàng ngày (hh:mm:ss)</td>`
+                    convertHtml += `<td> ${item}</td>`
+                    convertHtml += "</tr>"
+           })
+           }
+
+           if("EVM" in data.time_set){
+               data.time_set.EVM.forEach(function(item) {
+                    convertHtml += "<tr>"
+                    convertHtml += `<td> Thời gian thực thi hàng tháng (dd hh:mm:ss)</td>`
+                    convertHtml += `<td> ${item}</td>`
+                    convertHtml += "</tr>"
+               })
+            }
+
+           if("EVT" in data.time_set){
+               data.time_set.EVT.forEach(function(item) {
+                    convertHtml += "<tr>"
+                    convertHtml += '<td> Khoảng thời gian giữa 2 lần thực thi (s)</td>'
+                    convertHtml += '<td> ${item}</td>'
+                    convertHtml += "</tr>"
+               })
+           }
+           $(".dataTable").html(convertHtml)
+      });
+  }
+
+  function updateService(){
+
   }
 
    function deleteService(){
+    var service_name = names;
+
       $.ajax({
           type: "POST",
           url: "/deleteService",
           data: { service_name }
       })
       .done(function(msg){
-          alert("Data delete success!!!!!!!!!!!");
+          alert("Delete success!!!")
           //Tải lại trang
           $('#formDelete');
           location.reload();
       });
    }
+
+    function locationFormSchedule(){
+        window.location = "/schedule";
+    }
 </script>
 
 <style>
+    body{
+         height: 250px;
+         width: 568px;
+         padding-top: 50px;
+         text-align: left;
+         background-color: lightblue;
+         color: darkblue;
+         font-size: 18px;
+         margin: auto;
+         padding: auto;
+    }
+
     table {
-          width: 300px;
+          width: 500px;
          border: 1px solid black;
     }
+
     th, td {
         text-align: center
         border: 1px solid grey;
         border: 1px solid grey;
         padding: 5px;
     }
+
     col-group {
         column-width: 70%;
     }
+
     .popup {
      display: none;
      position: fixed;
@@ -188,6 +256,7 @@
      border: 1px solid #ccc;
      z-index: 10;
    }
+
    .popup form {
      display: flex;
      flex-direction: column;
@@ -232,4 +301,32 @@
      height:100vh;
      overflow-y:hidden;
    }
+    .alert-message {
+      background-color: #f44336;
+      border: 1px solid #d9534f;
+      color: #fff;
+      padding: 10px;
+    }
+
+    .dataTable {
+         width: 500px;
+         border: 1px solid black;
+    }
+
+    #resultSearch {
+        width: 80%;
+        padding: auto;
+        text-align:left;
+    }
+    #resultSearch {
+      display: flex; /* Sử dụng flexbox để căn giữa các phần tử */
+      justify-content: center; /* Căn giữa các phần tử theo chiều ngang */
+    }
+
+    #resultSearch > div:nth-child(2),
+    #resultSearch > div:nth-child(3) {
+      flex-grow: 1; /* Cho phép các div này chiếm toàn bộ không gian có sẵn */
+    }
+
+
 </style>
