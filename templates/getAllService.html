@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Get all service</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
 
 </head>
@@ -12,7 +12,7 @@
 {% with errors = get_flashed_messages(category_filter=["error"]) %}
 {% if errors %}
 <div class="alert-message block-message error">
-    <!--    <a class="close" href="#">×</a>-->
+        <a class="close" href="#">×</a>
     <ul>
         {%- for msg in errors %}
         <li>{{ msg }}</li>
@@ -164,7 +164,6 @@
   let names = []
   function openFormDelete(service_name) {
        $( ".popupDelete" ).css("display", "block");
-
       names = service_name;
   }
 
@@ -233,9 +232,12 @@
    }
 
  function openFormUpdate(service_name) {
-       $(".popupUpdate").css("display", "block");
        names = service_name
-       // lấy ra thông tin theo service_name cần update
+       $.ajax({
+          method: "POST",
+          url: "/searchService",
+          data: { names }
+      })
 
 
    }

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Form Update</title>
+</head>
+
+<body>
+{% with errors = get_flashed_messages(category_filter=["error"]) %}
+{% if errors %}
+<div class="alert-message block-message error">
+    <!--    <a class="close" href="#">×</a>-->
+    <ul>
+        {%- for msg in errors %}
+        <li>{{ msg }}</li>
+        {% endfor -%}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
+<div class="content">
+    <h1 style="text-align: center;">Form cập nhật</h1>
+    <form action="{{ url_for('search_service')}}" method="POST" style="text-align: center" name="myForm">
+        {% if result_search %}
+        <div>
+            <label>Tên dịch vụ</label>
+            <span>
+                 <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required
+                        value="{{ result_search.service_name }}"/>
+          </span>
+            <label>Token telegram</label>
+            <span>
+                 <input id="token_telegram" name="token_telegram" type="text" placeholder="Nhập token telegram" required
+                        value="{{ result_search.token_telegram }}"/>
+          </span>
+            <label>Mã nhóm</label>
+            <span>
+                 <input id="group_id" name="group_id" type="text" placeholder="Nhập mã nhóm của bạn" required
+                        value="{{ result_search.group_id }}"/>
+          </span>
+            <label> Config </label>
+            <span>
+                <textarea name="config_file" id="config_file" rows="36" cols="60"
+                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ result_search.config_file }}</textarea>
+          </span>
+        </div>
+        <div class="selectTag">
+            <select id="selectTag" for="time_set">
+                <option value="EVM" name="EVM">Thời gian thực thi hàng tháng (dd hh:mm:ss)</option>
+                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (hh:mm:ss)</option>
+                <option value="EVT" name="EVT">Khoảng thời gian giữa 2 lần thực thi (s)</option>
+            </select>
+            <div id="time_set">
+                <input type="text" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
+                <input type="text" id="time_set_time" name="time_set_time" placeholder="Nhập thời gian">
+            </div>
+            <span>
+            <input type="button" value="+" onclick="add()"/>
+          </span>
+        </div>
+        <div style="padding-top: 30px;">
+            <button type="submit" onclick="save()">Lưu</button>
+            <div class="btn" onclick="locationGetAll()" style="width: 63.77px; height: 35px;">Thoát</div>
+        </div>
+
+        <div>
+            <label>
+                <table id="dataTable" style="text-align: left; width: 800px">
+                    {% if result_search.time_set.evm %}
+                        {%- for item in result_search.time_set.evm %}
+                        <tr>
+                            <td>Thời gian thực thi hàng tháng (dd hh:mm:ss)</td>
+                            <td>{{item}}
+                                <input name="evm[]" type="hidden" value="{{item}}"></td>
+                            <td>
+                                <div class="delete_btn">-</div>
+                            </td>
+                        </tr>
+                        {% endfor -%}
+                        {% endif %}
+
+                        {% if result_search.time_set.evd %}
+                        {%- for item in result_search.time_set.evd %}
+                        <tr>
+                            <td>Thời gian thực thi hàng ngày (hh:mm:ss)</td>
+                            <td>{{item}}
+                                <input name="evd[]" type="hidden" value="{{item}}"></td>
+                            <td>
+                                <div class="delete_btn">-</div>
+                            </td>
+                        </tr>
+                        {% endfor -%}
+                        {% endif %}
+
+                        {% if result_search.time_set.evt %}
+                        {%- for item in result_search.time_set.evt %}
+                        <tr>
+                            <td>Khoảng thời gian thực thi</td>
+                            <td>{{item}}
+                                <input name="evt[]" type="hidden" value="{{item}}"></td>
+                            <td>
+                                <div class="delete_btn">-</div>
+                            </td>
+                        </tr>
+                        {% endfor -%}
+                        {% endif %}
+                    {% endif %}
+                </table>
+            </label>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+<script>
+    // Lấy token telegram
+    var token_telegram = document.getElementById("token_telegram");
+
+    //Lấy group id
+    var group_id = document.getElementById("group_id");
+
+    // lấy service_name
+    service_name = document.getElementById("service_name");
+
+    // Lấy nội dung config_file
+    config_file_value = document.getElementById("config_file").value;
+
+   // lấy select và input tương ứng
+     select = document.getElementById("selectTag");
+     var time_set_day = document.getElementById("time_set_day");
+     var time_set_time = document.getElementById("time_set_time");
+
+   $('#selectTag').change(function(){
+     var select_value = $(this).val();
+     if(select_value === 'EVM'){
+         time_set_day.style.display = "block";
+         time_set_time.style.display = "block";
+
+     }else {
+         time_set_day.style.display = "none";
+         time_set_time.style.display = "block";
+
+     }
+   });
+
+    //sự kiện onclick chạy trong cả chương trình (bắt đầu -> cookie)
+    $(document).on('click', '.delete_btn', function(e){
+         deleteRow(this, event);
+    });
+
+ function add() {
+     var input_time_set = document.getElementById("time_set");
+
+     // lấy giá trị của input
+     if(select.value === "EVM"){
+         if(time_set_day.value === ""){
+              document.getElementById("time_set_day").value = "1";
+         }
+
+         if(time_set_time.value === ""){
+              document.getElementById("time_set_time").value = "0";
+         }
+
+         var time_set_value = {"day": time_set_day.value, "hour": time_set_time.value};
+     }else {
+         if(time_set_time.value === ""){
+              document.getElementById("time_set_time").value = "0";
+         }else{
+             var time_set_value = document.getElementById("time_set_time").value;
+         }
+     }
+
+     //check trc khi push
+     var day, hour
+     time_set_value = check_time_set(select.value, time_set_value);
+     if(select.value === "EVM" && time_set_value !== false){
+          if(time_set_value.day.length === 1){
+            day = "0" + time_set_value.day;
+          }else{
+            day = time_set_value.day;
+          }
+          hour = time_set_value.hour;
+     }
+
+     // Đặt giá trị input về rỗng sau khi kiểm tra
+     document.getElementById("time_set_day").value = "";
+     document.getElementById("time_set_time").value = "";
+
+     var dataTable = document.getElementById("dataTable");
+     var row = dataTable.insertRow();
+     var cell1 = row.insertCell(0);
+     var cell2 = row.insertCell(1);
+     var cell3 = row.insertCell(2);
+
+     if(time_set_value !== false){
+         if(select.value === "EVM"){
+         cell1.innerHTML = "Thời gian thực thi hàng tháng (dd hh:mm:ss)";
+         cell2.innerHTML = day + ' ' + hour +  '<input name="evm[]" type= "hidden" value ="'+ day + ' ' + hour +'"/>' ;
+
+         }else if(select.value === "EVD"){
+            if(!moment(time_set_value).isValid()){
+               cell1.innerHTML = "Thời gian thực thi hàng ngày (hh:mm:ss)";
+            }
+            cell2.innerHTML = time_set_value + '<input name="evd[]" type= "hidden" value ="' + time_set_value +'"/>';
+         }else{
+            cell1.innerHTML = "Khoảng thời gian giữa 2 lần thực thi (s)";
+            cell2.innerHTML = time_set_value + '<input name="evt[]" type= "hidden" value ="' + time_set_value +'"/>';
+         }
+         // Thêm nút xóa ở mỗi dòng trong bảng
+
+         cell3.innerHTML ='<div class= "delete_btn">-</div>';
+     }
+ }
+
+  // Lấy giá trị của input time_set theo mảng
+    evt = Array.from(document.getElementsByName("evt[]"));
+    evd = Array.from(document.getElementsByName("evd[]"));
+    evm = Array.from(document.getElementsByName("evm[]"));
+
+ function deleteRow(button, event) {
+     // Check if the pointerType is not an empty string before proceeding
+     if (event.pointerType !== "") {
+         event.stopPropagation(); // Prevent the event from bubbling up
+         var row = button.parentNode.parentNode;
+         var label = row.cells[0].innerHTML;
+         var value = row.cells[1].innerHTML;
+
+         console.log("key-value muốn delete ===>> " + label + " - " + value);
+
+        // xóa phần tử trong mảng khi -
+         if ("Thời gian thực thi hàng ngày (hh:mm:ss)" === label){
+             var index = evd.indexOf(value);
+             evd.splice(index, 1);
+         }else if("Khoảng thời gian giữa 2 lần thực thi (s)" === label){
+             var index = evt.indexOf(value);
+             evt.splice(index, 1);
+         }else {
+             var index = evm.indexOf(value);
+             evm.splice(index, 1);
+         }
+
+       // Xóa dòng trong bảng khi click -
+         row.parentNode.removeChild(row);
+     }
+ }
+
+
+ function check_time_set(select_value, time_set_value) {
+      var input_time_set = document.getElementById("time_set");
+      var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
+      var isInteger = true
+      var is_hour = true
+      var day
+      var is_day = true
+
+      if(select_value === "EVT"){
+         isInteger = !isNaN(time_set_value) && time_set_value > 0;
+      }
+
+      if(select_value === "EVM"){
+         day = time_set_value["day"];
+         // console.log("day ===" + day)
+
+         var hour = time_set_value["hour"];
+         console.log("hour ===" + hour)
+
+         is_day = !isNaN(day) && day > 0 && day <=31;
+         console.log("is_day ===" + is_day)
+
+         is_hour = moment(hour, "HH:mm:ss");
+         console.log("is_hour ===" + is_hour)
+     }
+
+     // Định dạng ngày tháng và thời gian
+
+     if((select_value === "EVM" &&  (is_hour.isValid() == false || is_day == false)) || (select_value === "EVT" && !isInteger) || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
+         // input_time_set.validationMessage = "Input không hợp lệ";
+         alert("Giá trị nhập vào không hợp lệ!!!")
+         console.log("Giá trị 0000 hợp lệ");
+         return false;
+     }else{
+         // Dữ liệu đầu vào hợp lệ
+         console.log("Giá trị hợp lệ");
+         if(select_value === "EVD"){
+           return is_HH_mm_ss.subtract(1,'days').format('HH:mm:ss');
+         }else if(select_value === "EVM"){
+           return {"day": day, "hour":  is_hour.subtract(1,'days').format('HH:mm:ss')};
+         }else{
+             return time_set_value;
+         }
+     }
+ }
+
+ function isConfig(){
+     // console.log( "check isConfig" + config_file_value);
+     config_file_content = config_file_value.replace(/^\s+|\s+$/g, "");
+     var firstChar = config_file_content.charAt(0);
+     console.log("firstChar ==== " + firstChar)
+     var lastChar = config_file_content.charAt(config_file_content.length - 1);
+     console.log("lastChar ==== " + lastChar)
+
+     if (firstChar === "[" && lastChar === "]") {
+       //console.log("Chuỗi hợp lệ");
+       return true;
+     } else {
+       //console.log("Chuỗi không hợp lệ");
+       return false;
+     }
+ }
+
+function isTextInput(){
+    if(group_id.trim() === "" || token_telegram.trim() ===""){
+        return false;
+    }else {
+        return true;
+    }
+}
+
+
+ function save(){
+     if (service_name.value === "") {
+           alert("Bạn phải nhập tên dịch vụ!");
+           return false;
+      }
+
+     if (isTextInput === false) {
+         alert("Không được để trống hoặc chỉ nhập khoẳng trắng!!!")
+         return false
+     }
+     // Gửi form để lưu dữ liệu
+     document.forms[0].submit();
+ }
+ function locationGetAll(){
+        window.location = "/getAllService";
+    }
+
+</script>
+<style>
+     body {
+         height: 250px;
+         width: 568px;
+         padding-top: 50px;
+         text-align: left;
+         background-color: lightblue;
+         color: darkblue;
+         font-size: 18px;
+         margin: auto;
+         padding: auto;
+    }
+    label {
+        display: flex;
+        justify-content: left;
+        margin-bottom: 20px;
+        margin: auto;
+        padding: auto;
+    }
+
+    table{
+        vertical-align: middle;
+        border-collapse:collapse;
+        width: 420px;
+        margin: 20px;
+        padding: 15px;
+
+
+    }
+    table.td {
+        font-size: 16px;
+        justify-content: left;
+    }
+
+    .delete_btn {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 2px 5px;
+        cursor: pointer;
+        border-radius: 4px;
+        text-align: center;
+        font: 16;
+    }
+
+    button[type="submit"] {
+        background-color: #34a853;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn {
+        background-color: red;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 10;
+    }
+
+    select {
+        width: 468px;
+    }
+
+    #time_set {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #time_set_day, #time_set_time {
+        flex: 1;
+    }
+
+    input[type="text"],
+    textarea, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input:required {
+    border: red;
+    }
+</style>
