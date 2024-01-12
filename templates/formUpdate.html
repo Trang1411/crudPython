@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Form Update</title>
+    <title>Form Schedule</title>
 </head>
 
 <body>
 {% with errors = get_flashed_messages(category_filter=["error"]) %}
 {% if errors %}
 <div class="alert-message block-message error">
-    <!--    <a class="close" href="#">×</a>-->
     <ul>
         {%- for msg in errors %}
         <li>{{ msg }}</li>
@@ -20,28 +19,26 @@
 {% endwith %}
 <div class="content">
     <h1 style="text-align: center;">Form cập nhật</h1>
-    <form action="{{ url_for('search_service')}}" method="POST" style="text-align: center" name="myForm">
-        {% if result_search %}
+    <form action="{{ url_for('update_service')}}" method="POST" style="text-align: center" name="myForm">
         <div>
-            <label>Tên dịch vụ</label>
+            <label>Tên dịch vụ:  </label>
             <span>
-                 <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required
-                        value="{{ result_search.service_name }}"/>
-          </span>
-            <label>Token telegram</label>
+                <input id="service_name" name="service_name" type="text"     value="{{ service_name }}" readonly />
+            </span>
+            <label>Token telegram: </label>
             <span>
                  <input id="token_telegram" name="token_telegram" type="text" placeholder="Nhập token telegram" required
-                        value="{{ result_search.token_telegram }}"/>
+                        value="{{ token_telegram }}"/>
           </span>
-            <label>Mã nhóm</label>
+            <label>Mã nhóm: </label>
             <span>
                  <input id="group_id" name="group_id" type="text" placeholder="Nhập mã nhóm của bạn" required
-                        value="{{ result_search.group_id }}"/>
+                        value="{{ group_id }}"/>
           </span>
-            <label> Config </label>
+            <label>Config: </label>
             <span>
                 <textarea name="config_file" id="config_file" rows="36" cols="60"
-                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ result_search.config_file }}</textarea>
+                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
           </span>
         </div>
         <div class="selectTag">
@@ -51,8 +48,8 @@
                 <option value="EVT" name="EVT">Khoảng thời gian giữa 2 lần thực thi (s)</option>
             </select>
             <div id="time_set">
-                <input type="text" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
-                <input type="text" id="time_set_time" name="time_set_time" placeholder="Nhập thời gian">
+                <input type="text" class="day" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
+                <input type="text" class="time" id="time_set_time" name="time_set_time" placeholder="Nhập thời gian">
             </div>
             <span>
             <input type="button" value="+" onclick="add()"/>
@@ -66,45 +63,48 @@
         <div>
             <label>
                 <table id="dataTable" style="text-align: left; width: 800px">
-                    {% if result_search.time_set.evm %}
-                        {%- for item in result_search.time_set.evm %}
-                        <tr>
-                            <td>Thời gian thực thi hàng tháng (dd hh:mm:ss)</td>
-                            <td>{{item}}
-                                <input name="evm[]" type="hidden" value="{{item}}"></td>
-                            <td>
-                                <div class="delete_btn">-</div>
-                            </td>
-                        </tr>
-                        {% endfor -%}
-                        {% endif %}
-
-                        {% if result_search.time_set.evd %}
-                        {%- for item in result_search.time_set.evd %}
-                        <tr>
-                            <td>Thời gian thực thi hàng ngày (hh:mm:ss)</td>
-                            <td>{{item}}
-                                <input name="evd[]" type="hidden" value="{{item}}"></td>
-                            <td>
-                                <div class="delete_btn">-</div>
-                            </td>
-                        </tr>
-                        {% endfor -%}
-                        {% endif %}
-
-                        {% if result_search.time_set.evt %}
-                        {%- for item in result_search.time_set.evt %}
-                        <tr>
-                            <td>Khoảng thời gian thực thi</td>
-                            <td>{{item}}
-                                <input name="evt[]" type="hidden" value="{{item}}"></td>
-                            <td>
-                                <div class="delete_btn">-</div>
-                            </td>
-                        </tr>
-                        {% endfor -%}
-                        {% endif %}
+                    {% if evm %}
+                    {%- for item in evm %}
+                    <tr>
+                        <td>Thời gian thực thi hàng tháng (dd hh:mm:ss)</td>
+                        <td>{{item}}
+                            <input name="evm[]" type="hidden" value="{{item}}"></td>
+                        <td>
+                            <div class="delete_btn">-</div>
+                        </td>
+                    </tr>
+                    {% endfor -%}
                     {% endif %}
+
+                    {% if evd %}
+                    {%- for item in evd %}
+                    <tr>
+                        <td>Thời gian thực thi hàng ngày (hh:mm:ss)</td>
+                        <td>{{item}}
+                            <input name="evd[]" type="hidden" value="{{item}}"></td>
+                        <td>
+                            <div class="delete_btn">-</div>
+                        </td>
+                    </tr>
+                    {% endfor -%}
+                    {% endif %}
+
+                    {% if evt %}
+                    {%- for item in evt %}
+                    <tr>
+                        <td>Khoảng thời gian thực thi</td>
+                        <td>{{item}}
+                            <input name="evt[]" type="hidden" value="{{item}}"></td>
+                        <td>
+                            <div class="delete_btn">-</div>
+                        </td>
+                    </tr>
+                    {% endfor -%}
+                    {% endif %}
+                    <tr>
+                        <th></th>
+                        <th></th>
+                    </tr>
                 </table>
             </label>
         </div>
@@ -123,9 +123,10 @@
 
     // lấy service_name
     service_name = document.getElementById("service_name");
+    console.log("service_name ==== " + service_name)
 
     // Lấy nội dung config_file
-    config_file_value = document.getElementById("config_file").value;
+    config_file = document.getElementById("config_file");
 
    // lấy select và input tương ứng
      select = document.getElementById("selectTag");
@@ -135,13 +136,11 @@
    $('#selectTag').change(function(){
      var select_value = $(this).val();
      if(select_value === 'EVM'){
-         time_set_day.style.display = "block";
-         time_set_time.style.display = "block";
-
+        $( ".day" ).css("display", "block");
+        $( ".time" ).css("display", "block");
      }else {
-         time_set_day.style.display = "none";
-         time_set_time.style.display = "block";
-
+         $( ".day" ).css("display", "none");
+        $( ".time" ).css("display", "block");
      }
    });
 
@@ -246,7 +245,6 @@
      }
  }
 
-
  function check_time_set(select_value, time_set_value) {
       var input_time_set = document.getElementById("time_set");
       var is_HH_mm_ss = moment(time_set_value, "HH:mm:ss");
@@ -294,8 +292,8 @@
  }
 
  function isConfig(){
-     // console.log( "check isConfig" + config_file_value);
-     config_file_content = config_file_value.replace(/^\s+|\s+$/g, "");
+     // console.log( "check isConfig" + config_file.value);
+     config_file_content = config_file.value.replace(/^\s+|\s+$/g, "");
      var firstChar = config_file_content.charAt(0);
      console.log("firstChar ==== " + firstChar)
      var lastChar = config_file_content.charAt(config_file_content.length - 1);
@@ -318,13 +316,11 @@ function isTextInput(){
     }
 }
 
-
  function save(){
      if (service_name.value === "") {
            alert("Bạn phải nhập tên dịch vụ!");
            return false;
       }
-
      if (isTextInput === false) {
          alert("Không được để trống hoặc chỉ nhập khoẳng trắng!!!")
          return false
@@ -332,100 +328,101 @@ function isTextInput(){
      // Gửi form để lưu dữ liệu
      document.forms[0].submit();
  }
+
  function locationGetAll(){
         window.location = "/getAllService";
     }
 
 </script>
 <style>
-     body {
-         height: 250px;
-         width: 568px;
-         padding-top: 50px;
-         text-align: left;
-         background-color: lightblue;
-         color: darkblue;
-         font-size: 18px;
-         margin: auto;
-         padding: auto;
-    }
-    label {
-        display: flex;
-        justify-content: left;
-        margin-bottom: 20px;
+    body {
+        height: 250px;
+        width: 568px;
+        padding-top: 50px;
+        text-align: left;
+        background-color: lightblue;
+        color: darkblue;
+        font-size: 18px;
         margin: auto;
         padding: auto;
-    }
+   }
+   label {
+       display: flex;
+       justify-content: left;
+       margin-bottom: 20px;
+       margin: auto;
+       padding: auto;
+   }
 
-    table{
-        vertical-align: middle;
-        border-collapse:collapse;
-        width: 420px;
-        margin: 20px;
-        padding: 15px;
+   table{
+       vertical-align: middle;
+       border-collapse:collapse;
+       width: 420px;
+       margin: 20px;
+       padding: 15px;
 
 
-    }
-    table.td {
-        font-size: 16px;
-        justify-content: left;
-    }
+   }
+   table.td {
+       font-size: 16px;
+       justify-content: left;
+   }
 
-    .delete_btn {
-        background-color: #dc3545;
-        color: #fff;
-        border: none;
-        padding: 2px 5px;
-        cursor: pointer;
-        border-radius: 4px;
-        text-align: center;
-        font: 16;
-    }
+   .delete_btn {
+       background-color: #dc3545;
+       color: #fff;
+       border: none;
+       padding: 2px 5px;
+       cursor: pointer;
+       border-radius: 4px;
+       text-align: center;
+       font: 16;
+   }
 
-    button[type="submit"] {
-        background-color: #34a853;
-        color: #fff;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+   button[type="submit"] {
+       background-color: #34a853;
+       color: #fff;
+       padding: 10px 20px;
+       border: none;
+       border-radius: 4px;
+       cursor: pointer;
+   }
 
-    .btn {
-        background-color: red;
-        color: #fff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        text-align: center;
-        font-size: 10;
-    }
+   .btn {
+       background-color: red;
+       color: #fff;
+       border: none;
+       border-radius: 4px;
+       cursor: pointer;
+       text-align: center;
+       font-size: 10;
+   }
 
-    select {
-        width: 468px;
-    }
+   select {
+       width: 468px;
+   }
 
-    #time_set {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
+   #time_set {
+       display: flex;
+       flex-wrap: wrap;
+       gap: 10px;
+   }
 
-    #time_set_day, #time_set_time {
-        flex: 1;
-    }
+   #time_set_day, #time_set_time {
+       flex: 1;
+   }
 
-    input[type="text"],
-    textarea, select {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
+   input[type="text"],
+   textarea, select {
+       width: 100%;
+       padding: 8px;
+       margin-bottom: 10px;
+       border: 1px solid #ccc;
+       border-radius: 4px;
+       box-sizing: border-box;
+   }
 
-    input:required {
-    border: red;
-    }
+   input:required {
+   border: red;
+   }
 </style>

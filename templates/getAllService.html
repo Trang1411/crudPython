@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Get all service</title>
 
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>-->
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
 
 </head>
@@ -12,7 +12,7 @@
 {% with errors = get_flashed_messages(category_filter=["error"]) %}
 {% if errors %}
 <div class="alert-message block-message error">
-        <a class="close" href="#">×</a>
+    <a class="close" href="#">×</a>
     <ul>
         {%- for msg in errors %}
         <li>{{ msg }}</li>
@@ -45,10 +45,7 @@
             <tr>
                 <td>{{ file.replace(".json", "") }}</td>
                 <td>
-                    <button type="button" class="btn btn-success button" data-toggle="modal"
-                            data-modal="1"
-                            onclick='openFormUpdate("{{ file }}")'>Sửa
-                    </button>
+                    <a href="/updateService?service_name={{ file }}">Sửa</a>
                 </td>
                 <td>
                     <button type="button" class="btn btn-danger button" data-toggle="modal"
@@ -113,33 +110,6 @@
         </center>
     </div>
 </div>
-
-<div class="modal popupUpdate" id="popupFormUpdate">
-    <div class="modal-inner">
-        <span class="close">&times;</span>
-        <h2> Thông tin dịch vụ</h2>
-        <div id="contentUpdate">
-            <div>
-                <label>Tên dịch vụ: </label>
-                <span><input class="service-name-ud"></span> <br>
-                <label>Token telegram: </label>
-                <span><input class="token-telegram-ud"></span> <br>
-                <label>Mã nhóm: </label>
-                <span><input class="group-id-ud"></span> <br>
-                <label> Config: </label> <br>
-                <textarea class="config" rows="28" cols="90"></textarea>
-            </div>
-            <br>
-            <div>
-                <label>
-                    <table class="dataTable-ud">
-
-                    </table>
-                </label>
-            </div>
-        </div>
-    </div>
-</div>
 </body>
 </html>
 
@@ -161,10 +131,10 @@
       document.getElementById("resultSearch").style.display = "block";
   }
 
-  let names = []
-  function openFormDelete(service_name) {
+  let service_name = []
+  function openFormDelete(name) {
        $( ".popupDelete" ).css("display", "block");
-      names = service_name;
+      service_name = name;
   }
 
   function search(){
@@ -185,16 +155,14 @@
            })
            $(".config-search").val(convertString)
            var convertHtml = "";
-
            if("EVD" in data.time_set){
                 data.time_set.EVD.forEach(function(item) {
                     convertHtml += "<tr>"
                     convertHtml += `<td> Thời gian thực thi hàng ngày (hh:mm:ss)</td>`
                     convertHtml += `<td> ${item}</td>`
                     convertHtml += "</tr>"
-           })
+                })
            }
-
            if("EVM" in data.time_set){
                data.time_set.EVM.forEach(function(item) {
                     convertHtml += "<tr>"
@@ -229,17 +197,6 @@
           $('#formDelete');
           location.reload();
       });
-   }
-
- function openFormUpdate(service_name) {
-       names = service_name
-       $.ajax({
-          method: "POST",
-          url: "/searchService",
-          data: { names }
-      })
-
-
    }
 
     function locationFormSchedule(){

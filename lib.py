@@ -135,12 +135,12 @@ def readFileScheduleData():
 
 def writeFileScheduleData(dataSave):
     with open("scheduleData.json", "w") as saveData:
-        json.dump(dataSave, saveData)
+        json.dump(dataSave, saveData, indent=4)
 
 
 def writeFile(filename, dataSave):
     with open(filename, "w") as saveData:
-        json.dump(dataSave, saveData)
+        json.dump(dataSave, saveData, indent=4)
 
 
 def executeFile():
