@@ -257,7 +257,7 @@ def update_service():
                     else:
                         time_save = ts
                     if time_save not in old:
-                        print("chưa có giờ nàyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+                        print("chưa có giờ nàyyyyyyyyyyyyyyyyy")
                         # print(f"add {time_save} vào old thôiiiiiiiii")
                         old[time_save] = [file_name]
                     else:
@@ -307,8 +307,6 @@ def update_service():
                                token_telegram=token_telegram_get, group_id=group_id_get,
                                config_file=config, time_set_data=time_set_get,
                                evt=evt_get, evd=evd_get, evm=evm_get)
-
-    return render_template("getAllService.html")
 
 
 @app.route('/deleteService', methods=['GET', 'POST'])
