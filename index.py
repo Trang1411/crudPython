@@ -4,7 +4,8 @@ from json import JSONDecodeError
 
 from flask import Flask, render_template, request, flash, session, redirect
 
-from lib import writeFile, readFileScheduleData, writeFileScheduleData
+from lib import writeFile, readFileScheduleData, writeFileScheduleData, deleteInScheduleData
+import zipfile
 
 app = Flask(__name__)
 
@@ -23,7 +24,21 @@ def form_schedule():
         # Lấy thông tin từ request
         token_telegram_request = request.form.get("token_telegram")
         group_id_request = request.form.get("group_id")
-        service_name_request = request.form.get('service_name')
+        # Lấy file zip config + ảnh (nếu có)
+        # config_file_requests = request.files["file"]
+        # service_name = config_file_requests.filename
+        # config_file_requests.save(service_name + ".zip")
+
+        file = request.files["file"]
+
+        # Giải nén file
+        with zipfile.ZipFile(file.filename, "r") as zip_file:
+            zip_file.extractall("botData")
+
+        # # Giải nén file zip
+        # with config_file_requests.ZipFile(service_name + ".zip", "r") as zip_ref:
+        #     zip_ref.extractall("botData")  # giải nén và lưu sang botData
+
         config_file_requests = request.form.get('config_file')
         evd = request.form.getlist('evd[]')
         evt = request.form.getlist('evt[]')
@@ -233,15 +248,8 @@ def update_service():
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
 
+        deleteInScheduleData(file_name)
         old = readFileScheduleData()
-        # xóa thông tin thời gian cũ đã lưu trong scheduleData
-        # print(f"TYPE old ==== {type(old)}")
-        for key in old.keys():
-            for item in old[key]:
-                if service_name_request == item:
-                    dele = item.remove(service_name_request)
-                    print("------------------hellooooooooooo----------------------------", dele)
-
         # tạo dict để lưu vào scheduleData loại bỏ thành phần không có giá trị (ví dụ: "EVT" = []) và lưu vào
         for key in time_set.keys():
             if time_set[key]:
@@ -257,15 +265,12 @@ def update_service():
                     else:
                         time_save = ts
                     if time_save not in old:
-                        print("chưa có giờ nàyyyyyyyyyyyyyyyyy")
+                        print(f"chưa có {time_save} ---------------")
                         # print(f"add {time_save} vào old thôiiiiiiiii")
                         old[time_save] = [file_name]
                     else:
-                        if service_name_request not in old[time_save]:
-                            print(f"dịch vụ {service_name_request} chưa có trong thời gian này")
-                            old[time_save].append(file_name)
-                        else:
-                            print(f" dịch vụ {service_name_request} có trong thời gian này rồi, skippppppppppp")
+                        print(f"dịch vụ {service_name_request} chưa có trong {time_save} ----------------")
+                        old[time_save].append(file_name)
 
                     writeFileScheduleData(old)
         data = {
@@ -277,7 +282,7 @@ def update_service():
         }
         # Ghi dữ liệu JSON vào tệp
         writeFile(path, data)
-        return render_template("getAllService.html")
+        return redirect('/getAllService')
     else:
         svn = request.args["service_name"]
         data = get_service(svn)

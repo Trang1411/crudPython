@@ -21,97 +21,23 @@
 {% endwith %}
 <div class="content">
     <h1 style="text-align: center;">Form đăng ký</h1>
-    <form action="{{ url_for('form_schedule')}}" method="POST" style="text-align: center" name="myForm">
+    <form action="{{ url_for('form_schedule')}}" method="POST" enctype="multipart/form-data" style="text-align: center" name="myForm">
         <div>
 
-            <label>Tên dịch vụ</label>
-            <span>
-                 <input id="service_name" name="service_name" type="text" placeholder="Nhập tên dịch vụ" required
-                        value="{{ service_name }}"/>
-          </span>
-            <label>Token telegram</label>
-            <span>
-                 <input id="token_telegram" name="token_telegram" type="text" placeholder="Nhập token telegram" required
-                        value="{{ token_telegram }}"/>
-          </span>
-            <label>Mã nhóm</label>
-            <span>
-                 <input id="group_id" name="group_id" type="text" placeholder="Nhập mã nhóm của bạn" required
-                        value="{{ group_id }}"/>
-          </span>
             <label> Config </label>
             <span>
-                <textarea name="config_file" id="config_file" rows="36" cols="60"
-                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
+<!--                <textarea name="config_file" id="config_file" rows="36" cols="60"-->
+<!--                          placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>-->
+                <input type="file" id="config_file" name="file" required>
           </span>
         </div>
-        <div class="selectTag">
-            <select id="selectTag" for="time_set">
-                <option value="EVM" name="EVM">Thời gian thực thi hàng tháng (dd hh:mm:ss)</option>
-                <option value="EVD" name="EVD"> Thời gian thực thi hàng ngày (hh:mm:ss)</option>
-                <option value="EVT" name="EVT">Khoảng thời gian giữa 2 lần thực thi (s)</option>
-            </select>
-            <div id="time_set">
-                <input type="text" id="time_set_day" name="time_set_day" placeholder="Nhập ngày"/>
-                <input type="text" id="time_set_time" name="time_set_time" placeholder="Nhập thời gian">
-            </div>
-            <span>
-            <input type="button" value="+" onclick="add()"/>
-          </span>
-        </div>
+
         <div style="padding-top: 30px;">
             <button type="submit" onclick="save()">Lưu</button>
             <div class="btn" onclick="locationGetAll()" style="width: 63.77px; height: 35px;">Thoát</div>
         </div>
 
-        <div>
-            <label>
-                <table id="dataTable" style="text-align: left; width: 800px">
-                    {% if evm %}
-                    {%- for item in evm %}
-                    <tr>
-                        <td>Thời gian thực thi hàng tháng (dd hh:mm:ss)</td>
-                        <td>{{item}}
-                            <input name="evm[]" type="hidden" value="{{item}}"></td>
-                        <td>
-                            <div class="delete_btn">-</div>
-                        </td>
-                    </tr>
-                    {% endfor -%}
-                    {% endif %}
 
-                    {% if evd %}
-                    {%- for item in evd %}
-                    <tr>
-                        <td>Thời gian thực thi hàng ngày (hh:mm:ss)</td>
-                        <td>{{item}}
-                            <input name="evd[]" type="hidden" value="{{item}}"></td>
-                        <td>
-                            <div class="delete_btn">-</div>
-                        </td>
-                    </tr>
-                    {% endfor -%}
-                    {% endif %}
-
-                    {% if evt %}
-                    {%- for item in evt %}
-                    <tr>
-                        <td>Khoảng thời gian thực thi</td>
-                        <td>{{item}}
-                            <input name="evt[]" type="hidden" value="{{item}}"></td>
-                        <td>
-                            <div class="delete_btn">-</div>
-                        </td>
-                    </tr>
-                    {% endfor -%}
-                    {% endif %}
-                    <tr>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </table>
-            </label>
-        </div>
     </form>
 </div>
 </body>
@@ -297,22 +223,6 @@
      }
  }
 
- function isConfig(){
-     // console.log( "check isConfig" + config_file_value);
-     config_file_content = config_file_value.replace(/^\s+|\s+$/g, "");
-     var firstChar = config_file_content.charAt(0);
-     console.log("firstChar ==== " + firstChar)
-     var lastChar = config_file_content.charAt(config_file_content.length - 1);
-     console.log("lastChar ==== " + lastChar)
-
-     if (firstChar === "[" && lastChar === "]") {
-       //console.log("Chuỗi hợp lệ");
-       return true;
-     } else {
-       //console.log("Chuỗi không hợp lệ");
-       return false;
-     }
- }
 
 function isTextInput(){
     if(group_id.trim() === "" || token_telegram.trim() ===""){
