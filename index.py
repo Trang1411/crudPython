@@ -3,6 +3,7 @@ import os
 from json import JSONDecodeError
 
 from flask import Flask, render_template, request, flash, session, redirect
+from werkzeug.utils import secure_filename
 
 from lib import writeFile, readFileScheduleData, writeFileScheduleData, deleteInScheduleData
 import zipfile
@@ -30,6 +31,8 @@ def form_schedule():
         # config_file_requests.save(service_name + ".zip")
 
         file = request.files["file"]
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         # Giải nén file
         with zipfile.ZipFile(file.filename, "r") as zip_file:
