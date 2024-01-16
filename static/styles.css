@@ -1,0 +1,91 @@
+ body {
+         height: 250px;
+         width: 568px;
+         padding-top: 50px;
+         text-align: left;
+         background-color: lightblue;
+         color: darkblue;
+         font-size: 18px;
+         margin: auto;
+         padding: auto;
+    }
+    label {
+        display: flex;
+        justify-content: left;
+        margin-bottom: 20px;
+        margin: auto;
+        padding: auto;
+    }
+
+    table{
+        vertical-align: middle;
+        border-collapse:collapse;
+        width: 420px;
+        margin: 20px;
+        padding: 15px;
+
+
+    }
+    table.td {
+        font-size: 16px;
+        justify-content: left;
+    }
+
+    .delete_btn {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 2px 5px;
+        cursor: pointer;
+        border-radius: 4px;
+        text-align: center;
+        font: 16;
+    }
+
+    button[type="submit"] {
+        background-color: #34a853;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn {
+        background-color: red;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        font: 16;
+    }
+
+    select {
+        width: 468px;
+    }
+
+    #time_set {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #time_set_day, #time_set_time {
+        flex: 1;
+    }
+
+    input[type="text"],
+    textarea, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input:required {
+    border: red;
+    }

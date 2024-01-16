@@ -1,5 +1,4 @@
 {
-    "image_back": "idg20240115/IDG01_b1bce07c-b38d-11ee-a062-712f17414414",
-    "image_front": "idg20240115/IDG01_b1dbda2e-b38d-11ee-a062-b1d79cf5cb3e",
-    "checkGet": "idg20240115/IDG01_b1bce07c-b38d-11ee-a062-712f17414414"
+    "image_back": "idg20240116/IDG01_d42aec16-b450-11ee-a062-5b19680c8e0e",
+    "image_front": "idg20240116/IDG01_d44bba88-b450-11ee-a062-8f254fe825a7"
 }
