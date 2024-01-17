@@ -6,6 +6,7 @@ import re
 import time
 from functools import partial
 from telegram import Bot
+import telethon
 
 import requests
 import schedule
@@ -26,7 +27,7 @@ def check_response(response_data, method, url, body, service_name):
     if "_error" in response_data:
         message = f'ERROR!!! \n Dịch vụ {service_name} thực hiện {method} với url: {url} \n, body: {body} \n lỗi {response_data.get("_error")}'
         err = {"message": message, "type": "error"}
-    if "_error" not in response_data and int(total_time) > 10:
+    if "_error" not in response_data and int(total_time) > 1:
         message = f"WARNING!!! \n Dịch vụ {service_name} có response_tine là {response_data.get('elapsed_time')}"
         err = {"message": message, "type": "warning"}
     print("err", err)
@@ -170,11 +171,15 @@ def read_json_file(service_name, day_run):
                 total_time = the_end_time - time_start
                 # check kết quả response_data, nếu có key = _error thì gửi lên telegram với {url, body, @user}
                 check_resp = check_response(response_data, method, url, body, service_name)
-                if "message" in check_resp:
+                if "message" in check_resp and check_resp.get("type") is "error":
                     print(f' message ======= {check_resp.get("message")}')
                     # gửi lên telegram
-                    send_mess_format_text(api_key, chat_id, "BOT SYSTEM", check_resp.get("message")
+                    send_mess_format_text(api_key, chat_id, "BOT SYSTEM", f"❌❌❌ " + check_resp.get("message")
                                           + f"\n {t_u} vui lòng kiểm tra lỗi!!!")
+                if "message" in check_resp and check_resp.get("type") is "warning":
+                    print(f' message ======= {check_resp.get("message")}')
+                    # gửi lên telegram
+                    send_mess_format_text(api_key, chat_id, "BOT SYSTEM", f"⚠️⚠️⚠️ " + check_resp.get("message"))
                     raise ValueError(f"Dịch vụ {service_name} thực thi thành công!!!")
                 # print("response_data ====== ", response_data)
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
@@ -191,12 +196,11 @@ def read_json_file(service_name, day_run):
 
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
-
-                mess = f"SUCCESS!!! - Thời gian chạy dịch vụ {service_name} là {total_time} s" + f"\n {t_u}"
+                mess = f"✅✅✅ SUCCESS!!! \n Thời gian chạy dịch vụ {service_name} là {total_time} s"
             asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
-        message = f"ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra"
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra"
         asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM",  message))
         print("lỗi đâyyyyy: ", err)
     return
