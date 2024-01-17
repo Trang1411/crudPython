@@ -90,7 +90,7 @@ def form_schedule():
                 return render_template("formSchedule.html")
 
             # check format của file config có đủ key-value không
-            if len(data) != 4 or (token_telegram_val or group_id_val or config_file_val or time_set_val) is None:
+            if len(data) != 5 or (token_telegram_val or group_id_val or config_file_val or time_set_val) is None:
                 flash("Bạn chưa nhập đủ nội dung config, vui lòng kiểm tra lại!!!", 'error')
                 return render_template("formSchedule.html")
         except JSONDecodeError as e:
