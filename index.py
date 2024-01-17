@@ -6,7 +6,7 @@ from json import JSONDecodeError
 from flask import Flask, render_template, request, flash, session, redirect
 from werkzeug.utils import secure_filename
 
-from lib import writeFile, readFileScheduleData, writeFileScheduleData, checkhhmmss
+from lib import writeFile, checkhhmmss
 import zipfile
 
 app = Flask(__name__)
@@ -131,9 +131,7 @@ def search_service():
     if request.method == "POST":
         key_search = request.form.get("service_name")
         print(f"key search ========= {key_search}")
-        if ".json" not in key_search:
-            key_search = key_search + ".json"
-        path = os.path.join("botData", key_search)  # tạo đường dẫn chuẩn
+        path = os.path.join("botData", key_search, "config.json")  # tạo đường dẫn chuẩn
         if os.path.exists(path):
             with open(path, "r") as rf:
                 result_search_dict = json.load(rf)
@@ -168,8 +166,7 @@ def update_service():
         evt = request.form.getlist('evt[]')
         evm = request.form.getlist('evm[]')
 
-        file_name = service_name_request + ".json"
-        path = os.path.join("botData", file_name)  # tạo đường dẫn chuẩn
+        path = os.path.join("botData", service_name_request, "config.json")  # tạo đường dẫn chuẩn
 
         print(f"service_name_request ::::::: {service_name_request}")
         print(f"group_id_request ::::::: {group_id_request}")

@@ -4,10 +4,13 @@ import json
 import os
 import re
 from functools import partial
+from telegram import Bot
 
 import requests
 import schedule
-
+import asyncio
+# import tracemalloc
+# tracemalloc.start()
 
 def check_response(response_data, method, url, body, service_name):
     err = {}
@@ -15,12 +18,15 @@ def check_response(response_data, method, url, body, service_name):
     # kiem tra thoi gian tra ve neu >10s thi gui canh bao warning
     # build message
     # gui len nhom telegram
+    total_time = response_data.get("elapsed_time").total_seconds()
+    print("response_data.get(elapsed_time) ==== ", total_time)
     if "_error" in response_data:
         message = f'Dịch vụ {service_name} thực hiện {method} với url: {url} \n, body: {body} \n lỗi {response_data.get("_error")}'
         err = {"message": message, "type": "error"}
-    if "_error" not in response_data and response_data.get("elapsed_time") > 10:
+    if "_error" not in response_data and int(total_time) > 10:
         message = f"warning: Dịch vụ {service_name} có response_tine là {response_data.get('elapsed_time')}"
         err = {"message": message, "type": "warning"}
+    print("err",err)
     return err
 
 
@@ -41,21 +47,36 @@ def _post(url, headers, body):
 
 
 def _get(url, headers, body):
-    response = requests.get(url, headers=headers, data=body)
-    response.raise_for_status()
-    return response.json()
+    global response
+    try:
+        response = requests.get(url, headers=headers, data=body)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        return {"status": response.status_code, "url": response.url, "time": datetime.datetime.now(),
+                "_error": error, "elapsed_time": response.elapsed}
+    return {"response_data": response.json(), "elapsed_time": response.elapsed}
 
 
 def _put(url, headers, body):
-    response = requests.put(url, headers=headers, data=body)
-    response.raise_for_status()
-    return response.json()
+    global response
+    try:
+        response = requests.put(url, headers=headers, data=body)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        return {"status": response.status_code, "url": response.url, "time": datetime.datetime.now(),
+                "_error": error, "elapsed_time": response.elapsed}
+    return {"response_data": response.json(), "elapsed_time": response.elapsed}
 
 
 def _upload_file(url, headers, body, files):
-    response = requests.post(url, headers=headers, files=files, data=body)
-    response.raise_for_status()
-    return response.json()
+    global response
+    try:
+        response = requests.post(url, headers=headers, files=files, data=body)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        return {"status": response.status_code, "url": response.url, "time": datetime.datetime.now(),
+                "_error": error, "elapsed_time": response.elapsed}
+    return {"response_data": response.json(), "elapsed_time": response.elapsed}
 
 
 def get_value_by_path(json_obj, path):
@@ -95,6 +116,9 @@ def read_json_file(service_name, day_run):
             # print("======================>> ", type(data_file_json))
             # print("======================>> ", data_file_json)
             # Lấy dữ liệu của "_" trong mỗi json và lưu vào globalVal
+                # lấy thông tin gửi lên telegram
+            api_key = data_file_json.get("token_telegram")
+            chat_id = data_file_json.get("chat_id")
             config_file = data_file_json["config_file"]
             for config_file_json in config_file:
 
@@ -120,28 +144,30 @@ def read_json_file(service_name, day_run):
                             #     Kiểm tra file có tồn tại hay không?
                             if file_path is None:
                                 print("The file in json_file does not exists.")
-                                raise ValueError(
-                                    f" Loi o dich vu {service_name} khi đọc file{str(v)} ==> The file in json_file does not exists.")
+                                raise ValueError(f" Loi o dich vu {service_name} khi đọc file{str(v)}"
+                                                 f" ==> The file in json_file does not exists.")
                 # Thực hiện request
                 if method == "POST":
                     response_data = _post(url, headers, body)
                     print(f" file {service_name}, phương thức POST ===== và kết quả là {response_data}")
                 if method == "GET":
                     response_data = _get(url, headers, body)
-                    print(f" file {service_name} và phương thức GET ===== kết quả là {response_data}")
+                    # print(f" file {service_name} và phương thức GET ===== kết quả là {response_data}")
                 if method == "PUT":
                     response_data = _put(url, headers, body)
-                    print(f" file {service_name} và phương thức PUT ===== kết quả là {response_data}")
+                    # print(f" file {service_name} và phương thức PUT ===== kết quả là {response_data}")
                 if method == "UPLOAD_FILE":
                     with open(file_path, "rb") as image_file:
                         response_data = _upload_file(url, headers, body, {"file": image_file})
-                        print(f" file {service_name} phương thức UPLOAD_FILE ===== và kết quả là {response_data}")
-
+                        # print(response_data.get("response_data"))
+                        # print(f" file {service_name} phương thức UPLOAD_FILE ===== và kết quả là {response_data}")
                 # check kết quả response_data, nếu có key = _error thì gửi lên telegram với {url, body, @user}
                 check_resp = check_response(response_data, method, url, body, service_name)
                 if "message" in check_resp:
+                    print(f' message ======= {check_resp.get("message")}')
+                    # gửi lên telegram
+                    send_mess_format_text(api_key, chat_id, "BOT SYSTEM", check_resp.get("message"))
                     raise ValueError(f"Dịch vụ {service_name} thực thi thành công!!!")
-                # gửi lên telegram
                 # print("response_data ====== ", response_data)
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
                 if _pr is not None:
@@ -149,7 +175,7 @@ def read_json_file(service_name, day_run):
                         # chuyển đổi v thành path để lấy giá trị trong response
                         path = v.replace("$", "")
                         # print("v_path  ======", path)
-                        value = get_value_by_path(response_data, path)
+                        value = get_value_by_path(response_data.get("response_data"), path)
                         if value is not None:
                             globalVal[k] = value
                         else:
@@ -157,11 +183,32 @@ def read_json_file(service_name, day_run):
 
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
-                print()
+
                 print(f"SUCCESS!!! - ", f"Thời gian chạy {service_name} là  ====== {datetime.datetime.now()}")
+            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", "Thanh cong roi"))
+
     except ValueError as err:
-        print("lôi day", err)
-    return check_resp
+        print("lỗi đâyyyyy: ", err)
+    return
+async def send_mess_format_text(api_key, _chat_id, _from, _mess="Hello world", _file=None):
+    # api_key = "5579530637:AAHiJONsPHZ0bTsiHANWBrfqvE4QoRv0BlM"
+    print(api_key)
+    print(_chat_id)
+    print(_from)
+    print(_mess)
+    bot = Bot(token=api_key)
+    if _file:
+        try:
+            document = open(_file, "rb")
+            bot.send_document(chat_id=_chat_id,
+                              filename=_file,
+                              document=document,
+                              caption=_mess)
+        except Exception as e:
+            print(e)
+    else:
+        await bot.send_message(chat_id=_chat_id,
+                         text=f"From [{_from}]\n{_mess}")
 
 
 def readFile(path):

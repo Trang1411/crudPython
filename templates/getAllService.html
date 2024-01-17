@@ -146,7 +146,7 @@
       })
       .done(function(rs) {
            var data = JSON.parse(rs);
-           $(".service-name-search").text(data.service_name)
+           // $(".service-name-search").text(data.service_name)
            $(".token-telegram-search").text(data.token_telegram)
            $(".group-id-search").text(data.group_id)
            let convertString = "";
@@ -175,8 +175,8 @@
            if("EVT" in data.time_set){
                data.time_set.EVT.forEach(function(item) {
                     convertHtml += "<tr>"
-                    convertHtml += '<td> Khoảng thời gian giữa 2 lần thực thi (s)</td>'
-                    convertHtml += '<td> ${item}</td>'
+                    convertHtml += `<td> Khoảng thời gian giữa 2 lần thực thi (s)</td>`
+                    convertHtml += `<td> ${item}</td>`
                     convertHtml += "</tr>"
                })
            }
@@ -239,7 +239,7 @@
      top: 50%;
      left: 50%;
      transform: translate(-50%, -50%);
-     width: 300px;
+     width: 400px;
      height: 150px;
      background-color: #fff;
      padding: 20px;
@@ -318,5 +318,35 @@
       flex-grow: 1; /* Cho phép các div này chiếm toàn bộ không gian có sẵn */
     }
 
+#resultSearch {
+    /* Define overall container styles here */
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
+#resultSearch label {
+    /* Style for labels */
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.config-search {
+    /* Style for the textarea */
+    width: 100%;
+    font-family: monospace;
+}
+
+.dataTable-search {
+    /* Style for the data table */
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataTable-search th,
+.dataTable-search td {
+    /* Style for table headers and cells */
+    padding: 8px;
+    border: 1px solid #ddd;
+}
 </style>
