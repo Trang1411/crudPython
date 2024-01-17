@@ -9,6 +9,8 @@ from telegram import Bot
 import requests
 import schedule
 import asyncio
+
+
 # import tracemalloc
 # tracemalloc.start()
 
@@ -26,7 +28,7 @@ def check_response(response_data, method, url, body, service_name):
     if "_error" not in response_data and int(total_time) > 10:
         message = f"warning: Dịch vụ {service_name} có response_tine là {response_data.get('elapsed_time')}"
         err = {"message": message, "type": "warning"}
-    print("err",err)
+    print("err", err)
     return err
 
 
@@ -75,7 +77,7 @@ def _upload_file(url, headers, body, files):
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         return {"status": response.status_code, "url": response.url, "time": datetime.datetime.now(),
-                "_error": error, "elapsed_time": response.elapsed}
+                "_error": error, "elapsed_time": response.elapsed.total_seconds()}
     return {"response_data": response.json(), "elapsed_time": response.elapsed}
 
 
@@ -105,7 +107,7 @@ def read_json_file(service_name, day_run):
     try:
         print(f"day run ===== {day_run} và json_file ==== {service_name}")
         if day_run == datetime.date.today().day or day_run == 0:
-            global file_path, check_resp
+            global file_path, check_resp, mess
             globalVal = {}
             # Đọc file json
             # print("0000000000000", json_file)
@@ -116,7 +118,7 @@ def read_json_file(service_name, day_run):
             # print("======================>> ", type(data_file_json))
             # print("======================>> ", data_file_json)
             # Lấy dữ liệu của "_" trong mỗi json và lưu vào globalVal
-                # lấy thông tin gửi lên telegram
+            # lấy thông tin gửi lên telegram
             api_key = data_file_json.get("token_telegram")
             chat_id = data_file_json.get("chat_id")
             config_file = data_file_json["config_file"]
@@ -184,12 +186,14 @@ def read_json_file(service_name, day_run):
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
 
-                print(f"SUCCESS!!! - ", f"Thời gian chạy {service_name} là  ====== {datetime.datetime.now()}")
-            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", "Thanh cong roi"))
+                mess = f"SUCCESS!!! - Thời gian chạy {service_name} là {response.elapsed.total_seconds()}"
+            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
         print("lỗi đâyyyyy: ", err)
     return
+
+
 async def send_mess_format_text(api_key, _chat_id, _from, _mess="Hello world", _file=None):
     # api_key = "5579530637:AAHiJONsPHZ0bTsiHANWBrfqvE4QoRv0BlM"
     print(api_key)
@@ -208,7 +212,7 @@ async def send_mess_format_text(api_key, _chat_id, _from, _mess="Hello world", _
             print(e)
     else:
         await bot.send_message(chat_id=_chat_id,
-                         text=f"From [{_from}]\n{_mess}")
+                               text=f"From [{_from}]\n{_mess}")
 
 
 def readFile(path):
