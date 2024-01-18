@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import glob
 import json
@@ -5,37 +6,14 @@ import os
 import re
 import time
 from functools import partial
-from telegram import Bot
-import telethon
 
 import requests
 import schedule
-import asyncio
+from telegram import Bot
 
 
 # import tracemalloc
 # tracemalloc.start()
-
-def check_response(response_data, method, url, body, service_name):
-    err = {}
-    # kiem tra trang thai neu khac 200
-    # kiem tra thoi gian tra ve neu >10s thi gui canh bao warning
-    # build message
-    # gui len nhom telegram
-    total_time = response_data.get("elapsed_time").total_seconds()
-    print("response_data.get(elapsed_time) ==== ", total_time)
-    if "_error" in response_data:
-        message = (f'❌❌❌ ERROR \n Dịch vụ {service_name} thực hiện {method} với url: {url} \n, body: {body} '
-                   f'\n lỗi {response_data.get("_error")}')
-        err = {"message": message, "type": "error"}
-    if int(total_time) > 1:
-        message = (f"⚠️⚠️⚠️ **WARNING!!!** \n Dịch vụ ** {service_name} ** \n"
-                   f" Thực hiện {method} đến url: {url} có response_tine là"
-                   f" {total_time}")
-        err = {"message": message, "type": "warning"}
-    # print("err in check_response ============== ", err)
-    return err
-
 
 def _post(url, headers, body):
     # print("URL POST", url)
@@ -48,6 +26,7 @@ def _post(url, headers, body):
     except requests.exceptions.HTTPError as error:
         # print(error)
         # print("Ket qua ", response.text)
+        print(f"Lỗi http khi thực thi   _post ========= {response.status_code}: {response.text}")
         return {"status": response.status_code, "url": response.url, "time": datetime.datetime.now(),
                 "_error": error, "elapsed_time": response.elapsed}
     return {"response_data": response.json(), "elapsed_time": response.elapsed}
@@ -81,8 +60,9 @@ def _upload_file(url, headers, body, files):
         response = requests.post(url, headers=headers, files=files, data=body)
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
+        print(f"Lỗi http khi thực thi  _upload_file ====== {response.status_code}: {response.text}")
         return {"status": response.status_code, "url": response.url, "time": datetime.datetime.now(),
-                "_error": error, "elapsed_time": response.elapsed.total_seconds()}
+                "_error": error, "elapsed_time": response.elapsed}
     return {"response_data": response.json(), "elapsed_time": response.elapsed}
 
 
@@ -108,11 +88,33 @@ def get_path(path, filename):
         return None
 
 
+def check_response(response_data, method, url, body, service_name):
+    err = {}
+    # kiem tra trang thai neu khac 200
+    # kiem tra thoi gian tra ve neu >10s thi gui canh bao warning
+    # build message
+    # gui len nhom telegram
+    time_r = response_data.get("elapsed_time")
+    total_time = time_r.total_seconds()
+    print("response_data.get(elapsed_time) ==== ", total_time)
+    if "_error" in response_data:
+        message_e = f'{response_data.get("_error")}'
+        print(f" =============> message tại check_response: {message_e}")
+        err = {"message": message_e, "type": "error"}
+    if int(total_time) > 1:
+        message_w = (f"⚠️⚠️⚠️ **WARNING!!!** \n Dịch vụ ** {service_name} ** \n"
+                     f" Thực hiện {method} đến url: {url} có response_tine là"
+                     f" {total_time}")
+        err = {"message": message_w, "type": "warning"}
+    # print("err in check_response ============== ", err)
+    return err
+
+
 def read_json_file(service_name, day_run):
     global file_path, check_resp, mess, t_u, api_key, chat_id
     try:
         time_start = time.time()
-        print(f"day run ===== {day_run} và json_file ==== {service_name}")
+        # print(f"day run ===== {day_run} và json_file ==== {service_name}")
         if day_run == datetime.date.today().day or day_run == 0:
 
             globalVal = {}
@@ -175,9 +177,8 @@ def read_json_file(service_name, day_run):
 
                 # check kết quả response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
                 check_resp = check_response(response_data, method, url, body, service_name)
-
                 if "message" in check_resp and check_resp.get("type") == "error":
-                    print(f' message ======= {check_resp.get("message")}')
+                    print(f' message báo lỗi ======= {check_resp.get("message")}')
                     # gửi lên telegram
                     raise ValueError(check_resp.get("message"))
                     # send_mess_format_text(api_key, chat_id, "BOT SYSTEM", f"❌❌❌ " + check_resp.get("message")
@@ -203,11 +204,16 @@ def read_json_file(service_name, day_run):
 
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
-                mess = f"✅✅✅ SUCCESS!!! \n Thời gian chạy dịch vụ **{service_name}** là {total_time} s"
+                mess = f"✅✅✅ SUCCESS!!! \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
             asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
-        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra"
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        print("lỗi đâyyyyy: ", message)
+        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+
+    except Exception as err:
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("lỗi đâyyyyy: ", message)
         asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 

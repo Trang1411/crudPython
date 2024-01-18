@@ -4,7 +4,7 @@
   "user_telegram":["ailatatalaai","thutrang"],
   "config_file": [
     {
-      "url": "https://sandbox-idg.vnpt.vn/file-service/v1/addFile",
+      "url": "https://sandbox-idg.vnpt.vn/file-service/v1/addFile111",
       "method": "UPLOAD_FILE",
       "headers": {
         "mac-address": "WEB-001",
@@ -15,7 +15,7 @@
       "body": {
         "title": "title",
         "description": "description",
-        "_file": "backkkkk"
+        "_file": "back"
       },
       "_": {
         "image_back": "$object.hash"

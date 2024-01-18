@@ -15,7 +15,8 @@
       "body": {
         "title": "title",
         "description": "description",
-        "_file": "back"
+        "_file": "back",
+        "check_err": ""
       },
       "_": {
         "image_back": "$object.hash"
