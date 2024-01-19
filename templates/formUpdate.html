@@ -32,14 +32,18 @@
           </span>
             <label>Mã nhóm: </label>
             <span>
-                 <input id="group_id" name="group_id" type="text" placeholder="Nhập mã nhóm của bạn" required
-                        value="{{ group_id }}"/>
+                 <input id="chat_id" name="chat_id" type="text" placeholder="Nhập mã nhóm của bạn" required
+                        value="{{ chat_id }}"/>
           </span>
             <label>Config: </label>
             <span>
                 <textarea name="config_file" id="config_file" rows="36" cols="60"
                           placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
           </span>
+            <div class="file-attach">
+                <input type="file" id="files" name="files"  multiple="multiple">
+            </div>
+
         </div>
         <div class="selectTag">
             <select id="selectTag" for="time_set">
@@ -272,7 +276,6 @@
      }
 
      // Định dạng ngày tháng và thời gian
-
      if((select_value === "EVM" &&  (is_hour.isValid() == false || is_day == false)) || (select_value === "EVT" && !isInteger) || (select_value === "EVD" && !is_HH_mm_ss.isValid())){
          // input_time_set.validationMessage = "Input không hợp lệ";
          alert("Giá trị nhập vào không hợp lệ!!!")
@@ -322,7 +325,7 @@ function isTextInput(){
            return false;
       }
      if (isTextInput === false) {
-         alert("Không được để trống hoặc chỉ nhập khoẳng trắng!!!")
+         alert("Không được để trống hoặc chỉ nhập khoảng trắng!!!")
          return false
      }
      // Gửi form để lưu dữ liệu
@@ -420,6 +423,11 @@ function isTextInput(){
        border: 1px solid #ccc;
        border-radius: 4px;
        box-sizing: border-box;
+   }
+    input[type="file"] {
+       width: 100%;
+       padding: 8px;
+       margin-bottom: 10px;
    }
 
    input:required {

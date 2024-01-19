@@ -181,15 +181,11 @@ def read_json_file(service_name, day_run):
                     print(f' message báo lỗi ======= {check_resp.get("message")}')
                     # gửi lên telegram
                     raise ValueError(check_resp.get("message"))
-                    # send_mess_format_text(api_key, chat_id, "BOT SYSTEM", f"❌❌❌ " + check_resp.get("message")
-                    #                       + f"\n {t_u} vui lòng kiểm tra lỗi!!!")
                 if "message" in check_resp and check_resp.get("type") == "warning":
                     # gửi lên telegram
                     mess_warning = check_resp.get("message")
                     print(f' message cảnh báo ======= {mess_warning}')
                     asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
-                    # raise ValueError(f"Dịch vụ {service_name} thực thi thành công!!!")
-                # print("response_data ====== ", response_data)
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
                 if _pr is not None:
                     for k, v in _pr.items():

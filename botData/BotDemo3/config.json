@@ -1,7 +1,10 @@
 {
   "token_telegram": "5579530637:AAHiJONsPHZ0bTsiHANWBrfqvE4QoRv0BlM",
   "chat_id": "-419391239",
-  "user_telegram":["ailatatalaai","thutrang"],
+  "user_telegram": [
+    "ailatatalaai",
+    "thutrang"
+  ],
   "config_file": [
     {
       "url": "https://sandbox-idg.vnpt.vn/file-service/v1/addFile",
@@ -51,7 +54,7 @@
         "Token-key": "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJosNHeiDmpG2R+626Z8u79zTrSxaf2TJo6KtqVWyRG+7iuzchKkeeNxl+P6Uz9IxOYX2rQCRzd1h22yH1bZ6w8CAwEAAQ==",
         "Authorization": "bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhOTFlMGJlZS04ODgxLTExZWMtYTY0MS05OWVmYjlhYjM2YjQiLCJhdWQiOlsicmVzdHNlcnZpY2UiXSwidXNlcl9uYW1lIjoiYm9uYm9uY250dDJAZ21haWwuY29tIiwic2NvcGUiOlsicmVhZCJdLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdCIsIm5hbWUiOiJib25ib25jbnR0MkBnbWFpbC5jb20iLCJ1dWlkX2FjY291bnQiOiJhOTFlMGJlZS04ODgxLTExZWMtYTY0MS05OWVmYjlhYjM2YjQiLCJhdXRob3JpdGllcyI6WyJVU0VSIl0sImp0aSI6ImM1MWE2YzMyLThhMDAtNDc1Yi1iYzIyLWZiMTczMjA1NjgyNCIsImNsaWVudF9pZCI6ImFkbWluYXBwIn0.S4GVVlHBahidtsr_AfP4mG0JTTgD5KwhA3mGWDZLQOwxXa0HYNthlUkW8XcTPzuwoBqBMQEl0dx4dXI-Ew2sba1IX4Im-iV-_O3OdoYk0_39Xher6abJUAkFXnSvNZiWoxck7jMVccH_XxCoVYJwia0HVEZ21ij1IQE0eCcSxxJukvC0zf99yiIWbup6w93Iih99EKSvGmKoyj6xDEN6lv6xqgR5qbiUoe5wC9975tVX46CmlhgKMN6NH7lpIdlg90Tx-ScOUnjBkTfEFflxnevZlGwjF9bNbZfqnJ70U0oQIA-dOrb4D5UNfHmC81dTN3uJhU_0fHDEVDC2XS7EJg"
       },
-      "body":{
+      "body": {
         "img_front": "$image_front",
         "token": "8928skjhfa89298jahga1771vbvb",
         "client_session": "00-14-22-01-23-45-1548211589291",
@@ -60,12 +63,11 @@
     }
   ],
   "time_set": {
-    "EVD": [
-      "04:00:00",
-      "15:02:00"
-    ],
     "EVT": [
       "20"
+    ],
+    "EVD": [
+      "15:02:00"
     ]
   }
 }

@@ -1,7 +1,7 @@
 import os
+import time
 
 import schedule
-import time
 
 from lib import readFile, evt, evd, evm
 

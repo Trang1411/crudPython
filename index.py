@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 from json import JSONDecodeError
+from PIL import Image
 
 from flask import Flask, render_template, request, flash, session, redirect
 from werkzeug.utils import secure_filename
@@ -155,26 +156,42 @@ def get_service(service_name):
 @app.route('/updateService', methods=['GET', 'POST'])
 def update_service():
     global data, time_set, service_name_request, config_file_requests, config, str, \
-        time_save, token_telegram_get, service_name_get, group_id_get, config_file_get, time_set_get, evt_get, evd_get, evm_get
+        time_save, token_telegram_get, service_name_get, chat_id_get, config_file_get, \
+        user_telegram_get, time_set_get, evt_get, evd_get, evm_get
     if request.method == 'POST':
         # Lấy thông tin từ request
         token_telegram_request = request.form.get("token_telegram")
-        group_id_request = request.form.get("group_id")
+        chat_id_request = request.form.get("chat_id")
         service_name_request = request.form.get("service_name")
-        config_file_requests = request.form.get("config_file")
+        config_file_requests = request.form.getlist("config_file")
+        user_telegram_request = request.form.get("user_telegram")
+        attach_files = request.files["file"]
         evd = request.form.getlist('evd[]')
         evt = request.form.getlist('evt[]')
         evm = request.form.getlist('evm[]')
 
+        print(f" TYPE file attach ========= {type(attach_files)}")
+        # lưu file ảnh
+        path_img_file = os.path.join("botData", service_name_request)  # tạo đường dẫn chuẩn
+        # Tạo đối tượng Image từ file ảnh cần lưu
+        # for img in attach_files:
+        print(f"================= file ảnh là {attach_files}")
+        img_file = Image.open(attach_files)
+        print(f"==================  Image.open(img) = {img_file}")
+        # tạo path file ảnh cần lưu
+        path_img = os.path.join("botData", service_name_request) + "/" + img_file
+        # Lưu file ảnh bằng hàm save()
+        attach_files.save(path_img)
+
         path = os.path.join("botData", service_name_request, "config.json")  # tạo đường dẫn chuẩn
 
         print(f"service_name_request ::::::: {service_name_request}")
-        print(f"group_id_request ::::::: {group_id_request}")
+        print(f"chat_id_request ::::::: {chat_id_request}")
 
         # Lưu thông tin vào cookie
         session["service_name"] = service_name_request
         session["token_telegram"] = token_telegram_request
-        session["group_id"] = group_id_request
+        session["chat_id"] = chat_id_request
         session["config_file"] = config_file_requests
         session["evd"] = evd
         session["evt"] = evt
@@ -216,9 +233,9 @@ def update_service():
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
 
         data = {
-            "service_name": service_name_request,
             "token_telegram": token_telegram_request,
-            "group_id": group_id_request,
+            "chat_id": chat_id_request,
+            "user_telegram": user_telegram_request,
             "config_file": config_file_dicts,
             "time_set": time_set
         }
@@ -231,7 +248,8 @@ def update_service():
         # print(f" data ::::::::::::::::::::: {data}")
         service_name_get = svn
         token_telegram_get = data.get("token_telegram")
-        group_id_get = data.get("group_id")
+        chat_id_get = data.get("chat_id")
+        user_telegram_get = data.get("user_telegram")
         config_file_get = data.get("config_file")
         config = json.dumps(config_file_get)
         # print(f"file in config :::: {file}")
@@ -251,7 +269,7 @@ def update_service():
             evm_get = []
 
         return render_template("formUpdate.html", service_name=service_name_get,
-                               token_telegram=token_telegram_get, group_id=group_id_get,
+                               token_telegram=token_telegram_get, chat_id=chat_id_get,
                                config_file=config, time_set_data=time_set_get,
                                evt=evt_get, evd=evd_get, evm=evm_get)
 
