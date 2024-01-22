@@ -19,11 +19,12 @@
 {% endwith %}
 <div class="content">
     <h1 style="text-align: center;">Form cập nhật</h1>
-    <form action="{{ url_for('update_service')}}" method="POST" style="text-align: center" name="myForm">
+    <form action="{{ url_for('update_service')}}" method="POST" style="text-align: center" name="myForm"
+          enctype="multipart/form-data">
         <div>
-            <label>Tên dịch vụ:  </label>
+            <label>Tên dịch vụ: </label>
             <span>
-                <input id="service_name" name="service_name" type="text"     value="{{ service_name }}" readonly />
+                <input id="service_name" name="service_name" type="text" value="{{ service_name }}" readonly/>
             </span>
             <label>Token telegram: </label>
             <span>
@@ -40,8 +41,11 @@
                 <textarea name="config_file" id="config_file" rows="36" cols="60"
                           placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
           </span>
+            {% for image_path in images %}
+                    <img src="{{ image_path }}" alt="Image" width="300" height="200">
+            {% endfor %}
             <div class="file-attach">
-                <input type="file" id="files" name="files"  multiple="multiple">
+                <input type="file" id="files" name="images" multiple="multiple">
             </div>
 
         </div>

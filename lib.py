@@ -244,6 +244,16 @@ def writeFile(filename, dataSave):
         json.dump(dataSave, saveData, indent=4)
 
 
+def updateFile(filename, dataSave):
+    with open(filename, 'r') as f:
+        data = json.load(f)
+
+    data.update(dataSave)
+    # chuyển dữ liệu thành chuỗi json
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
+
+
 def is_time(key):
     parts = key.split(":")
     if len(parts) == 3 and all(part.isdigit() for part in parts) and re.match(r"^\d{2}:\d{2}:\d{2}$", key) is not None:
