@@ -4,7 +4,7 @@
   "user_telegram":["ailatatalaai","thutrang"],
   "config_file": [
     {
-      "url": "https://sandbox-idg.vnpt.vn/file-service/v1/addFile111",
+      "url": "https://sandbox-idg.vnpt.vn/file-service/v1/addFile",
       "method": "UPLOAD_FILE",
       "headers": {
         "mac-address": "WEB-001",
@@ -15,7 +15,8 @@
       "body": {
         "title": "title",
         "description": "description",
-        "_file": "back"
+        "_file": "back",
+        "condition": {"$image_back": "idg20240122/IDG01_0e0db1c6-b8f9-11ee-a062-cb0f2db9b293000"}
       },
       "_": {
         "image_back": "$object.hash"

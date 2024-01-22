@@ -7,7 +7,7 @@ from PIL import Image
 from flask import Flask, render_template, request, flash, session, redirect, send_file
 from werkzeug.utils import secure_filename
 
-from lib import writeFile, checkhhmmss, updateFile
+from lib import writeFile, checkhhmmss, updateFile, delete_service_before_update
 import zipfile
 
 app = Flask(__name__)
@@ -172,7 +172,6 @@ def update_service():
 
         # check TH nếu có upload ảnh thì lưu, không thì bỏ qua
         for image in attach_files:
-
             if image.filename == "":
                 print(f"tên file ảnh gốc trong trường hợp không upload ảnh là  {image.filename} ...")
                 break
@@ -185,11 +184,14 @@ def update_service():
 
         # print(f"service_name_request ::::::: {service_name_request}")
         # print(f"chat_id_request ::::::: {chat_id_request}")
+        print(f"====== TYPE======== [khi update thông tin] =========== ========== người nhận thông báo {type(user_telegram_request)}")
+        print(f"====== =========== [khi update thông tin] =========== ========== người nhận thông báo {user_telegram_request}")
 
         # Lưu thông tin vào cookie
         session["service_name"] = service_name_request
         session["token_telegram"] = token_telegram_request
         session["chat_id"] = chat_id_request
+        session["user_telegram"] = user_telegram_request
         session["config_file"] = config_file_requests
         session["evd"] = evd
         session["evt"] = evt
@@ -202,6 +204,13 @@ def update_service():
             time_set["EVM"] = evm
         if evd:
             time_set["EVD"] = evd
+
+        users = user_telegram_request.split(",")
+        user_telegram_save = []
+        for user in users:
+            print(f"các đối tượng trong danh sách user_telegram tại form update là {user}")
+            user_telegram_save.append(user)
+
         # print("time set ============ ", time_set)
         # print("TYPE time set ===== ", type(time_set))
         # print("path ======== ", path)
@@ -214,6 +223,7 @@ def update_service():
                                        service_name=session.get("service_name"),
                                        token_telegram=session.get("token_telegram"),
                                        group_id=session.get("group_id"),
+                                       user_telegram=session.get("user_telegram"),
                                        config_file=session.get("config_file"),
                                        evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
         except JSONDecodeError as e:
@@ -223,18 +233,28 @@ def update_service():
                                    service_name=session.get("service_name"),
                                    token_telegram=session.get("token_telegram"),
                                    group_id=session.get("group_id"),
+                                   user_telegram=session.get("user_telegram"),
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
+
+
+        # xóa thông tin dịch vụ để lưu lại thông tin mới
+        print(f"trước khi xóa 00000000000000000")
+        delete_service_before_update(service_name_request)
 
         data = {
             "token_telegram": token_telegram_request,
             "chat_id": chat_id_request,
-            "user_telegram": user_telegram_request,
+            "user_telegram": user_telegram_save,
             "config_file": config_file_requests,
             "time_set": time_set
         }
         # Ghi dữ liệu JSON vào tệp
-        updateFile(path, data)
+        # Tạo folder lưu dịch vụ (vì đã xóa dịc vụ cũ, update = xóa cũ + lưu mới)
+        new_path_service = os.path.join("botData", service_name_request)
+        os.mkdir(new_path_service)
+        path_config = os.path.join(new_path_service, "config.json")
+        writeFile(path_config, data)
         return redirect('/getAllService')
     else:
         svn = request.args["service_name"]
@@ -281,13 +301,14 @@ def update_service():
             print(f" tên các file ảnh là {images}")
             return render_template("formUpdate.html", service_name=service_name_get,
                                    token_telegram=token_telegram_get, chat_id=chat_id_get,
-                                   config_file=config_file_get, time_set_data=time_set_get,
-                                   evt=evt_get, evd=evd_get, evm=evm_get, images=images)
+                                   user_telegram=user_telegram_get, config_file=config_file_get,
+                                   time_set_data=time_set_get, evt=evt_get, evd=evd_get,
+                                   evm=evm_get, images=images)
         else:
             return render_template("formUpdate.html", service_name=service_name_get,
                                    token_telegram=token_telegram_get, chat_id=chat_id_get,
-                                   config_file=config_file_get, time_set_data=time_set_get,
-                                   evt=evt_get, evd=evd_get, evm=evm_get)
+                                   user_telegram=user_telegram_get, config_file=config_file_get,
+                                   time_set_data=time_set_get, evt=evt_get, evd=evd_get, evm=evm_get)
 
 
 @app.route('/deleteService', methods=['GET', 'POST'])

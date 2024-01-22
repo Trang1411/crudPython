@@ -4,6 +4,7 @@ import glob
 import json
 import os
 import re
+import shutil
 import time
 from functools import partial
 
@@ -127,10 +128,11 @@ def read_json_file(service_name, day_run):
             api_key = data_file_json.get("token_telegram")
             chat_id = data_file_json.get("chat_id")
             tag_users = data_file_json.get("user_telegram")
+            print(f" tên đối tượng nhận thông báo ================> {tag_users}")
             t_u = ""  # gắn vào mess để tag tên trong noti
             for user in tag_users:
                 t_u += "@" + user + " "
-            # print(f" tên các user đc tag trong noti là {t_u}")
+            print(f" tên các user đc tag trong noti là {t_u}")
 
             config_file = data_file_json["config_file"]
             for config_file_json in config_file:
@@ -158,6 +160,11 @@ def read_json_file(service_name, day_run):
                             if file_path is None:
                                 print("The file in json_file does not exists.")
                                 raise ValueError(f"File {str(v)} không tồn tại.")
+                        #         lấy điều kiện kết quả mong muốn của dịch vụ
+                        if k == "condition":
+                            cdt = body[k]
+                            print(f"type của giá trị điều kiện là {type(cdt)}")
+
                 # Thực hiện request
                 if method == "POST":
                     response_data = _post(url, headers, body)
@@ -172,6 +179,8 @@ def read_json_file(service_name, day_run):
                     with open(file_path, "rb") as image_file:
                         response_data = _upload_file(url, headers, body, {"file": image_file})
 
+                print(f" response_data =================== > {response_data}")
+
                 the_end_time = time.time()
                 total_time = the_end_time - time_start
 
@@ -185,7 +194,7 @@ def read_json_file(service_name, day_run):
                     # gửi lên telegram
                     mess_warning = check_resp.get("message")
                     print(f' message cảnh báo ======= {mess_warning}')
-                    asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
+                    # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
                 if _pr is not None:
                     for k, v in _pr.items():
@@ -201,17 +210,17 @@ def read_json_file(service_name, day_run):
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
                 mess = f"✅✅✅ SUCCESS!!! \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
-            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
+            # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
-        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
-        print("lỗi đâyyyyy: ", message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        # message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        print("lỗi đâyyyyy: ")  # , message)
+        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     except Exception as err:
-        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
-        print("lỗi đâyyyyy: ", message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        # message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        print("lỗi đâyyyyy: ")  # , message)
+        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     return
 
@@ -314,3 +323,15 @@ def checkhhmmss(str_value):
         return 0 <= hour <= 23 and 0 <= minute <= 59 and 0 <= second <= 59
     except ValueError:
         return False
+
+
+def delete_service_before_update(service_name):
+    print(f"11111111111 {service_name}")
+    path = os.path.join("botData", service_name)
+    print(os.path.exists(path))
+    if os.path.exists(path):
+        print(f"có tồn tại dịch vụ {service_name}")
+        # tạo đường dẫn chuẩn cho dịch vụ cần xóa
+
+        shutil.rmtree(path)
+        print(f" ============= xóa dịch vụ {service_name} cũ để lưu thông tin vừa cập nhật nè =========== ")
