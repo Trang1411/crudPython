@@ -3,8 +3,10 @@ import os
 import shutil
 from json import JSONDecodeError
 from PIL import Image
+import ast
 
-from flask import Flask, render_template, request, flash, session, redirect, send_file
+from flask import Flask, render_template, request, flash, session, redirect, send_file,jsonify
+from flask import Flask, render_template, request, flash, session, redirect, send_file,jsonify
 from werkzeug.utils import secure_filename
 
 from lib import writeFile, checkhhmmss, updateFile, delete_service_before_update
@@ -56,7 +58,7 @@ def form_schedule():
                     flash("Thời gian không hợp lệ, vui lòng kiểm tra lại!!!", 'error')
                     return render_template("formSchedule.html")
                 for time_evt in evt:
-                    if time_evt <= 0:
+                    if int(time_evt) <= 0:
                         flash("Khoảng thời gian giữa 2 lần thực thi không hợp lệ, vui lòng kiểm tra lại!!!", 'error')
                         return render_template("formSchedule.html")
             if "EVD" in time_set_val:
@@ -163,29 +165,31 @@ def update_service():
         token_telegram_request = request.form.get("token_telegram")
         chat_id_request = request.form.get("chat_id")
         service_name_request = request.form.get("service_name")
-        config_file_requests = request.form.getlist("config_file")
+        config_file_requests = request.form.get("config_file")
         user_telegram_request = request.form.get("user_telegram")
-        attach_files = request.files.getlist("images")
+        attach_files = request.files.getlist("filetests")
         evd = request.form.getlist('evd[]')
         evt = request.form.getlist('evt[]')
         evm = request.form.getlist('evm[]')
 
         # check TH nếu có upload ảnh thì lưu, không thì bỏ qua
-        for image in attach_files:
-            if image.filename == "":
-                print(f"tên file ảnh gốc trong trường hợp không upload ảnh là  {image.filename} ...")
+        for _file in attach_files:
+            if _file.filename == "":
+                print(f"tên file ảnh gốc trong trường hợp không upload ảnh là  {_file.filename} ...")
                 break
             # Lưu file ảnh vào dịch vụ với tên gốc
-            path_image = os.path.join("botData", service_name_request, image.filename)
+            path_image = os.path.join("botData", service_name_request, _file.filename)
             with open(path_image, "wb") as f:
-                f.write(image.read())
+                f.write(_file.read())
 
-        path = os.path.join("botData", service_name_request, "config.json")  # tạo đường dẫn chuẩn
+        path_config = os.path.join("botData", service_name_request, "config.json")  # tạo đường dẫn chuẩn
 
         # print(f"service_name_request ::::::: {service_name_request}")
         # print(f"chat_id_request ::::::: {chat_id_request}")
-        print(f"====== TYPE======== [khi update thông tin] =========== ========== người nhận thông báo {type(user_telegram_request)}")
-        print(f"====== =========== [khi update thông tin] =========== ========== người nhận thông báo {user_telegram_request}")
+        # print(f"====== TYPE====== [khi update thông tin] ========== người nhận thông báo {type(user_telegram_request)}")
+        # print(f"====== =========== [khi update thông tin] =========== người nhận thông báo {user_telegram_request}")
+        # print(f"====== TYPE====== [khi update thông tin] ========== người nhận thông báo {type(config_file_requests)}")
+        # print(f"====== =========== [khi update thông tin] =========== người nhận thông báo {config_file_requests}")
 
         # Lưu thông tin vào cookie
         session["service_name"] = service_name_request
@@ -208,7 +212,7 @@ def update_service():
         users = user_telegram_request.split(",")
         user_telegram_save = []
         for user in users:
-            print(f"các đối tượng trong danh sách user_telegram tại form update là {user}")
+            print(f"đối tượng trong danh sách user_telegram tại form update là {user}")
             user_telegram_save.append(user)
 
         # print("time set ============ ", time_set)
@@ -237,25 +241,20 @@ def update_service():
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
 
-
-        # xóa thông tin dịch vụ để lưu lại thông tin mới
-        print(f"trước khi xóa 00000000000000000")
-        delete_service_before_update(service_name_request)
+        data_conf = json.loads(config_file_requests)
+        print("data config========>", data_conf)
 
         data = {
             "token_telegram": token_telegram_request,
             "chat_id": chat_id_request,
             "user_telegram": user_telegram_save,
-            "config_file": config_file_requests,
+            "config_file": data_conf,
             "time_set": time_set
         }
-        # Ghi dữ liệu JSON vào tệp
-        # Tạo folder lưu dịch vụ (vì đã xóa dịc vụ cũ, update = xóa cũ + lưu mới)
-        new_path_service = os.path.join("botData", service_name_request)
-        os.mkdir(new_path_service)
-        path_config = os.path.join(new_path_service, "config.json")
+
         writeFile(path_config, data)
         return redirect('/getAllService')
+
     else:
         svn = request.args["service_name"]
         data = get_service(svn)
@@ -264,7 +263,8 @@ def update_service():
         token_telegram_get = data.get("token_telegram")
         chat_id_get = data.get("chat_id")
         user_telegram_get = data.get("user_telegram")
-        config_file_get = data.get("config_file")
+        user_telegram_get = ",".join(user_telegram_get)
+        config_file_get = json.dumps(data.get("config_file"))
         # config = json.dumps(config_file_get)
         # print(f"file in config :::: {file}")
         print(f"config :::::::: {config_file_get}")
@@ -284,40 +284,45 @@ def update_service():
 
         path_service = os.path.join("botData", svn)
         files_service = os.listdir(path_service)
-        images = []
-        # Tìm tất cả các file có tên chứa ký tự ".jpg"
+        _files = []
+        # Tìm tất cả các file có tên không chứa ký tự ".json"
         for file in files_service:
-            filename = str.lower(file)
-            print(f"======>  tên các file trong dịch vụ là {str.lower(file)}")
-            if ".jpg" in filename:
+            # filename = str.lower(file)
+            # print(f"======>  tên các file trong dịch vụ là {str.lower(file)}")
+            if ".json" not in file:
                 # Nhận đường dẫn đến hình ảnh
-                image_path = os.path.join("botData", svn, file)
-                print(f" image path ============ {image_path}")
-                images.append(image_path)
+                # image_path = os.path.join("botData", svn, file)
+                # print(f" file path ============ {image_path}")
+                _files.append(file)
 
-        if images:
-            for image in images:
-                send_file(image)
-            print(f" tên các file ảnh là {images}")
-            return render_template("formUpdate.html", service_name=service_name_get,
-                                   token_telegram=token_telegram_get, chat_id=chat_id_get,
-                                   user_telegram=user_telegram_get, config_file=config_file_get,
-                                   time_set_data=time_set_get, evt=evt_get, evd=evd_get,
-                                   evm=evm_get, images=images)
-        else:
-            return render_template("formUpdate.html", service_name=service_name_get,
-                                   token_telegram=token_telegram_get, chat_id=chat_id_get,
-                                   user_telegram=user_telegram_get, config_file=config_file_get,
-                                   time_set_data=time_set_get, evt=evt_get, evd=evd_get, evm=evm_get)
+            print(f" tên các file ảnh là {_files}")
+        return render_template("formUpdate.html", service_name=service_name_get,
+                               token_telegram=token_telegram_get, chat_id=chat_id_get,
+                               user_telegram=user_telegram_get, config_file=config_file_get,
+                               time_set_data=time_set_get, evt=evt_get, evd=evd_get,
+                               evm=evm_get, _files=_files)
+
+
+@app.route('/deleteFile', methods=['POST'])
+def delete_file():
+    if request.method == 'POST':
+        service_name = request.form.get("service_name")
+        file_del = request.form.get("file_name")
+        print(f" ================ dịch vụ {service_name} muốn xóa file {file_del}")
+        path = os.path.join("botData", service_name, file_del)  # tạo đường dẫn chuẩn
+        os.remove(path)
+        data = {"msg": "Xoa file thanh cong!"}
+        return jsonify(data)
+
 
 
 @app.route('/deleteService', methods=['GET', 'POST'])
 def delete_service():
     if request.method == 'POST':
-        file_del = request.form.get("service_name")
-        print(f" ================ want delete file {file_del}")
-        path = os.path.join("botData", file_del)  # tạo đường dẫn chuẩn
-        os.remove(path)
+        service_name = request.form.get("service_name")
+        path = os.path.join("botData", service_name)  # tạo đường dẫn chuẩn
+        # Xóa folder bao gồm các file bên trong nó
+        shutil.rmtree(path)
     return render_template("getAllService.html")
 
 

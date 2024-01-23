@@ -38,7 +38,8 @@
           </span>
             <label>Gửi đến: </label>
             <span>
-                 <input id="user_telegram" name="user_telegram" type="text" placeholder="Nhập đối tượng nhận thông báo" required
+                 <input id="user_telegram" name="user_telegram" type="text" placeholder="Nhập đối tượng nhận thông báo"
+                        required
                         value="{{ user_telegram }}"/>
           </span>
             <label>Config: </label>
@@ -46,11 +47,20 @@
                 <textarea name="config_file" id="config_file" rows="36" cols="60"
                           placeholder="Nhập nội dung của bạn trong [...] nhé" required>{{ config_file }}</textarea>
           </span>
-            {% for image_path in images %}
-                    <img src="{{ image_path }}" alt="Image" width="300" height="200">
-            {% endfor %}
+            <label>
+                <table id="data_files" style="text-align: left; width: 800px">
+                    {% for item_path in _files %}
+                    <tr>
+                        <td>{{ item_path }}</td>
+                        <td>
+                            <div class="delete_file"><a href="javascript:;" style=" text-decoration: none;" onclick="deleteFile('{{service_name}}', '{{ item_path }}')">-</a></div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </label>
             <div class="file-attach">
-                <input type="file" id="files" name="images" multiple="multiple">
+                <input type="file" id="files" name="filetests" multiple="multiple">
             </div>
 
         </div>
@@ -68,11 +78,6 @@
             <input type="button" value="+" onclick="add()"/>
           </span>
         </div>
-        <div style="padding-top: 30px;">
-            <button type="submit" onclick="save()">Lưu</button>
-            <div class="btn" onclick="locationGetAll()" style="width: 63.77px; height: 35px;">Thoát</div>
-        </div>
-
         <div>
             <label>
                 <table id="dataTable" style="text-align: left; width: 800px">
@@ -121,6 +126,15 @@
                 </table>
             </label>
         </div>
+        <div style="padding-top: 30px;">
+            <button type="submit" onclick="save()">Lưu</button>
+            <button class="btn" onclick="locationGetAll()" style="width: 63.77px; height: 35px;">Thoát</button>
+        </div>
+        <br/>
+         <br/> <br/>
+         <br/>
+         <br/>
+
     </form>
 </div>
 </body>
@@ -156,6 +170,29 @@
         $( ".time" ).css("display", "block");
      }
    });
+
+   function deleteFile(service_name, file_name) {
+      // Hiển thị alert confirm
+      var confirmation = confirm("Bạn có chắc chắn muốn xóa file " + file_name + " không?");
+
+      // Nếu người dùng nhấn OK, xóa file
+      if (confirmation) {
+            var options = {
+            method: 'POST',
+            url: "/deleteFile",
+            data: {
+              "service_name": service_name,
+              "file_name": file_name
+            }
+          };
+          // Gửi request
+          $.ajax(options).done(function(response) {
+            // Xử lý kết quả
+            alert(response.msg);
+            window.location.reload();
+          });
+      }}
+
 
     //sự kiện onclick chạy trong cả chương trình (bắt đầu -> cookie)
     $(document).on('click', '.delete_btn', function(e){

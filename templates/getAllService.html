@@ -43,7 +43,7 @@
             <tbody>
             {% for file in files %}
             <tr>
-                <td>{{ file.replace(".json", "") }}</td>
+                <td>{{ file }}</td>
                 <td>
                     <a href="/updateService?service_name={{ file }}">Sửa</a>
                 </td>
@@ -96,20 +96,6 @@
         </div>
     </div>
 </div>
-
-<div class="modal popupDelete" id="popupFormDelete">
-    <div class="modal-inner">
-        <span class="close">&times;</span>
-        <h2> Bạn chắc chắn muốn xóa? </h2>
-        <center>
-            <form method="POST" action="javascript:deleteService()" id="formDelete">
-                <div class="btn">
-                    <button onsubmit="/deleteService"><h3>Xóa</h3></button>
-                </div>
-            </form>
-        </center>
-    </div>
-</div>
 </body>
 </html>
 
@@ -131,10 +117,25 @@
       document.getElementById("resultSearch").style.display = "block";
   }
 
-  let service_name = []
-  function openFormDelete(name) {
-       $( ".popupDelete" ).css("display", "block");
-      service_name = name;
+  let name = "";
+  function openFormDelete(service_name) {
+        // Hiển thị alert confirm
+      var confirmation = confirm("Bạn có chắc chắn muốn xóa dịch vụ " + service_name + " không?");
+
+      // Nếu người dùng nhấn OK, xóa file
+       if (confirmation) {
+          $.ajax({
+              type: "POST",
+              url: "/deleteService",
+              data: { service_name }
+              })
+          .done(function(msg){
+              alert("Xóa dịch vụ thành công!!!")
+              //Tải lại trang
+              window.location.reload();
+          });
+       }
+
   }
 
   function search(){
@@ -183,21 +184,6 @@
            $(".dataTable-search").html(convertHtml)
       });
   }
-
-   function deleteService(){
-    var service_name = names;
-      $.ajax({
-          type: "POST",
-          url: "/deleteService",
-          data: { service_name }
-      })
-      .done(function(msg){
-          alert("Delete success!!!")
-          //Tải lại trang
-          $('#formDelete');
-          location.reload();
-      });
-   }
 
     function locationFormSchedule(){
         window.location = "/schedule";
