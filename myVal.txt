@@ -1,4 +1,9 @@
 {
-    "image_back": "idg20240122/IDG01_0ded3174-b8f9-11ee-a062-e980da2e87b8",
-    "image_front": "idg20240122/IDG01_0e0db1c6-b8f9-11ee-a062-cb0f2db9b293"
+    "hash_sodoAddFile": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_441997de-ba97-11ee-b836-23ee77aa1785",
+    "hash_CVVB": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_444ab9e0-ba97-11ee-8559-0dd47e865ccc",
+    "hash_CategoryVat": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_4534a4f3-ba97-11ee-9e75-9f117c116caa",
+    "hash_PXK": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_45b51f72-ba97-11ee-b836-7b24583ab0ef",
+    "hash_DKDNM": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_4667f4d5-ba97-11ee-9e75-bd4fbfa9a1b5",
+    "hash_DocVat": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_48a19133-ba97-11ee-9e75-a3f8a5c68425",
+    "hash_Docpxk": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_49409012-ba97-11ee-ba09-bbcec7343871"
 }

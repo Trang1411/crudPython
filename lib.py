@@ -99,10 +99,10 @@ def check_response(response_data, method, url, body, service_name):
     total_time = time_r.total_seconds()
     print("response_data.get(elapsed_time) ==== ", total_time)
     if "_error" in response_data:
-        message_e = f'{response_data.get("_error")}'
+        message_e = f'{response_data.get("_error")} \n Body: {body}'
         print(f" =============> message tại check_response: {message_e}")
         err = {"message": message_e, "type": "error"}
-    if int(total_time) > 1:
+    if int(total_time) > 3:
         message_w = (f"⚠️⚠️⚠️ **WARNING!!!** \n Dịch vụ ** {service_name} ** \n"
                      f" Thực hiện {method} đến url: {url} có response_tine là"
                      f" {total_time}")
@@ -187,14 +187,17 @@ def read_json_file(service_name, day_run):
                 # check kết quả response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
                 check_resp = check_response(response_data, method, url, body, service_name)
                 if "message" in check_resp and check_resp.get("type") == "error":
-                    print(f' message báo lỗi ======= {check_resp.get("message")}')
+                    print(f' message báo lỗi ======= {check_resp.get("message")}' 
+                          f"\n Thực hiện {method} đến url: {url}"
+                          f"\n Body: {body}"
+                          )
                     # gửi lên telegram
                     raise ValueError(check_resp.get("message"))
                 if "message" in check_resp and check_resp.get("type") == "warning":
                     # gửi lên telegram
                     mess_warning = check_resp.get("message")
                     print(f' message cảnh báo ======= {mess_warning}')
-                    # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
+                    asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
                 if _pr is not None:
                     for k, v in _pr.items():
@@ -210,17 +213,17 @@ def read_json_file(service_name, day_run):
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
                 mess = f"✅✅✅ SUCCESS!!! \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
-            # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
+            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
-        # message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("lỗi đâyyyyy: ")  # , message)
-        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     except Exception as err:
-        # message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("lỗi đâyyyyy: ")  # , message)
-        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     return
 
