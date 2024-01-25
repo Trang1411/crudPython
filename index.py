@@ -141,6 +141,9 @@ def search_service():
             # print(f"this is data search ========= {result_search_dict}")
             result_search = json.dumps(result_search_dict)
             return result_search
+        else:
+            flash("Tên dịch vụ tìm kiếm không tồn tại, vui lòng kiểm tra lại!!!", 'error')
+            return render_template("formUpdate.html")
     return result_search
 
 

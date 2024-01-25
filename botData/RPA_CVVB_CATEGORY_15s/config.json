@@ -301,10 +301,10 @@
                 "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZjZhYWVkNS0wOGU0LTExZWMtYmJmOC1mM2Q1MDAwNzg4NTkiLCJhdWQiOlsicmVzdHNlcnZpY2UiXSwidXNlcl9uYW1lIjoia2V5QGljLnZucHQudm4iLCJzY29wZSI6WyJyZWFkIl0sImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0IiwibmFtZSI6ImtleUBpYy52bnB0LnZuIiwidXVpZF9hY2NvdW50IjoiNGY2YWFlZDUtMDhlNC0xMWVjLWJiZjgtZjNkNTAwMDc4ODU5IiwiYXV0aG9yaXRpZXMiOlsiVVNFUiJdLCJqdGkiOiI2MzEyMzIyNi1hYWMzLTQzZGUtOTFhMS1hOGU2YjJkNmQ1MWQiLCJjbGllbnRfaWQiOiJhZG1pbmFwcCJ9.GyNepGPHy0fIWXjG5Xpx7zmjRdHS-p34KfKoxchkA2nc4H3RzPPd6YSBEU_bKWtDkDAR2PD5ROOHcLAFc1E2H104zmvSChIxTxHt3eMK07Vr6XD4Tsb5Hl-1uXieepMf2e4J0Azkk44AqI4SashZn13SK080EzlVq_tCD9bh4fdtGo9XqDJvHnRl4CzT5oNrpy3cUFfJbh4hybUlqzg0LX2zIfWrtae_qvXYbBcU443HVqAVx-WCHAtbYSRRmzaWcjqXRnFFskmxTlVvytn-BsJG21a7g6SaWc307wDl0nvArfa9IL2VomCJCold3YcdLKcDp9y0SuIDuYIfUvUsCA"
             },
             "body": {
-                "file_image": "$hash_DKKDimage",
+                "file": "$hash_DKKDimage",
                 "token": "8928skjhfa89298jahga1771vbvb",
                 "client_session": "00-14-22-01-23-45-1548211589291",
-                "type": "images"
+                "type": "jpg"
             }
         },
         {
@@ -382,5 +382,6 @@
         "EVT": [
             "15"
         ]
-    }
+    },
+    "is_send_success": "true"
 }

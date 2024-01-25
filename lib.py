@@ -112,7 +112,7 @@ def check_response(response_data, method, url, body, service_name):
 
 
 def read_json_file(service_name, day_run):
-    global file_path, check_resp, mess, t_u, api_key, chat_id
+    global file_path, check_resp, mess, t_u, api_key, chat_id, total_time
     try:
         time_start = time.time()
         # print(f"day run ===== {day_run} và json_file ==== {service_name}")
@@ -127,6 +127,8 @@ def read_json_file(service_name, day_run):
             # lấy thông tin gửi lên telegram
             api_key = data_file_json.get("token_telegram")
             chat_id = data_file_json.get("chat_id")
+            is_send_success = data_file_json.get("is_send_success")
+            print(f" ============ is_send_success ============ > {is_send_success}")
             tag_users = data_file_json.get("user_telegram")
             print(f" tên đối tượng nhận thông báo ================> {tag_users}")
             t_u = ""  # gắn vào mess để tag tên trong noti
@@ -135,6 +137,7 @@ def read_json_file(service_name, day_run):
             print(f" tên các user đc tag trong noti là {t_u}")
 
             config_file = data_file_json["config_file"]
+            dem = 0
             for config_file_json in config_file:
 
                 # Lấy dữ liệu của mỗi mục trong json
@@ -155,10 +158,10 @@ def read_json_file(service_name, day_run):
                         # lấy file_path của _file và check exists
                         if k == "_file":
                             file_path = get_path(os.path.join("botData", service_name), str(v))
-                            print("file_path:::::::::::::", file_path)
+                            # print("file_path:::::::::::::", file_path)
                             #     Kiểm tra file có tồn tại hay không?
                             if file_path is None:
-                                print("The file in json_file does not exists.")
+                                # print("The file in json_file does not exists.")
                                 raise ValueError(f"File {str(v)} không tồn tại.")
                         #         lấy điều kiện kết quả mong muốn của dịch vụ
                         if k == "condition":
@@ -168,7 +171,7 @@ def read_json_file(service_name, day_run):
                 # Thực hiện request
                 if method == "POST":
                     response_data = _post(url, headers, body)
-                    print(f" file {service_name}, phương thức POST ===== và kết quả là {response_data}")
+                    # print(f" file {service_name}, phương thức POST ===== và kết quả là {response_data}")
                 if method == "GET":
                     response_data = _get(url, headers, body)
                     # print(f" file {service_name} và phương thức GET ===== kết quả là {response_data}")
@@ -178,8 +181,9 @@ def read_json_file(service_name, day_run):
                 if method == "UPLOAD_FILE":
                     with open(file_path, "rb") as image_file:
                         response_data = _upload_file(url, headers, body, {"file": image_file})
+                dem += 1
 
-                print(f" response_data =================== > {response_data}")
+                print(f" response_data =================== > {url}")
 
                 the_end_time = time.time()
                 total_time = the_end_time - time_start
@@ -187,16 +191,16 @@ def read_json_file(service_name, day_run):
                 # check kết quả response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
                 check_resp = check_response(response_data, method, url, body, service_name)
                 if "message" in check_resp and check_resp.get("type") == "error":
-                    print(f' message báo lỗi ======= {check_resp.get("message")}' 
-                          f"\n Thực hiện {method} đến url: {url}"
-                          f"\n Body: {body}"
-                          )
+                    # print(f' message báo lỗi ======= {check_resp.get("message")}'
+                    #       f"\n Thực hiện {method} đến url: {url}"
+                    #       f"\n Body: {body}"
+                    #       )
                     # gửi lên telegram
                     raise ValueError(check_resp.get("message"))
                 if "message" in check_resp and check_resp.get("type") == "warning":
                     # gửi lên telegram
                     mess_warning = check_resp.get("message")
-                    print(f' message cảnh báo ======= {mess_warning}')
+                    # print(f' message cảnh báo ======= {mess_warning}')
                     asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
                 if _pr is not None:
@@ -212,12 +216,17 @@ def read_json_file(service_name, day_run):
 
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
-                mess = f"✅✅✅ SUCCESS!!! \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
-            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
+
+            # check_send = data_file_json["config_file"]["is_send_success"]
+            # print(f"========================== check send ==========================> {check_send}")
+            mess = f"✅✅✅ SUCCESS!!! \n Số lượng request: {dem} \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
+            print(f"========== \n Kết thúc và không gửi thông báo \n ============")
+            if is_send_success != "true":
+                asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
         message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
-        print("lỗi đâyyyyy: ")  # , message)
+        print("lỗi đâyyyyy: ", message)
         asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     except Exception as err:
