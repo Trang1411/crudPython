@@ -102,7 +102,7 @@ def check_response(response_data, method, url, body, service_name):
         message_e = f'{response_data.get("_error")} \n Body: {body}'
         print(f" =============> message tại check_response: {message_e}")
         err = {"message": message_e, "type": "error"}
-    if int(total_time) > 3:
+    if int(total_time) > 10:
         message_w = (f"⚠️⚠️⚠️ **WARNING!!!** \n Dịch vụ ** {service_name} ** \n"
                      f" Thực hiện {method} đến url: {url} có response_tine là"
                      f" {total_time}")

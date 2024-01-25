@@ -1,9 +1,11 @@
 {
-    "hash_sodoAddFile": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_441997de-ba97-11ee-b836-23ee77aa1785",
-    "hash_CVVB": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_444ab9e0-ba97-11ee-8559-0dd47e865ccc",
-    "hash_CategoryVat": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_4534a4f3-ba97-11ee-9e75-9f117c116caa",
-    "hash_PXK": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_45b51f72-ba97-11ee-b836-7b24583ab0ef",
-    "hash_DKDNM": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_4667f4d5-ba97-11ee-9e75-bd4fbfa9a1b5",
-    "hash_DocVat": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_48a19133-ba97-11ee-9e75-a3f8a5c68425",
-    "hash_Docpxk": "idg20240124-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_49409012-ba97-11ee-ba09-bbcec7343871"
+    "hash_sodoAddFile": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_0bf0523a-bb54-11ee-a428-e9d08613d21f",
+    "hash_CVVB": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_0c20ff30-bb54-11ee-8559-b14de2e01a41",
+    "hash_CategoryVat": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_0d23a1e8-bb54-11ee-ba09-4dc4d6c7ee25",
+    "hash_PXK": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_0da02524-bb54-11ee-8559-d354c16c0c2a",
+    "hash_DKDNM": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_0e57192d-bb54-11ee-9e75-1d9745ab8839",
+    "hash_DocVat": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_1092d812-bb54-11ee-ba09-a998f199508a",
+    "hash_Docpxk": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_11392a6e-bb54-11ee-8559-53ffa64e88e0",
+    "hash_DKKDpdf": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_135664f6-bb54-11ee-8bb5-fde404ce53a9",
+    "hash_DKKDimage": "idg20240125-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_144c0fcc-bb54-11ee-8559-e9efb128336d"
 }
