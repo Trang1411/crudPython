@@ -378,10 +378,12 @@
             }
         }
     ],
+    "condition1": {"$hash_Trangsach": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_410541a0-bbf1-11ee-a428-8588f949f625"},
+    "condition2": "khu phố 2, Thị trấn Tân Châu, Huyện Tân Châu, tỉnh Tây Ninh",
+    "condition3": {"regex":  ""},
     "time_set": {
         "EVT": [
             "15"
         ]
-    },
-    "is_send_success": "true"
+    }
 }

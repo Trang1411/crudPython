@@ -7,9 +7,11 @@ import re
 import shutil
 import time
 from functools import partial
+from json import JSONDecodeError
 
 import requests
 import schedule
+from flask import jsonify
 from telegram import Bot
 
 
@@ -127,14 +129,17 @@ def read_json_file(service_name, day_run):
             # lấy thông tin gửi lên telegram
             api_key = data_file_json.get("token_telegram")
             chat_id = data_file_json.get("chat_id")
-            is_send_success = data_file_json.get("is_send_success")
-            print(f" ============ is_send_success ============ > {is_send_success}")
+            success_msg = data_file_json.get("success_msg")
+            # print(f" ============ is_send_success ============ > {success_msg}")
+            condition_cf = data_file_json.get("condition")
+
             tag_users = data_file_json.get("user_telegram")
-            print(f" tên đối tượng nhận thông báo ================> {tag_users}")
+            # print(f" tên đối tượng nhận thông báo ================> {tag_users}")
             t_u = ""  # gắn vào mess để tag tên trong noti
             for user in tag_users:
                 t_u += "@" + user + " "
             print(f" tên các user đc tag trong noti là {t_u}")
+            print(f"============ condition  ======= {jsonify(condition_cf)}")
 
             config_file = data_file_json["config_file"]
             dem = 0
@@ -183,7 +188,7 @@ def read_json_file(service_name, day_run):
                         response_data = _upload_file(url, headers, body, {"file": image_file})
                 dem += 1
 
-                print(f" response_data =================== > {url}")
+                print(f" response_data =================== > {response_data}")
 
                 the_end_time = time.time()
                 total_time = the_end_time - time_start
@@ -202,6 +207,17 @@ def read_json_file(service_name, day_run):
                     mess_warning = check_resp.get("message")
                     # print(f' message cảnh báo ======= {mess_warning}')
                     asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
+                condition_type = check_type_condition(condition_cf)
+                print(f"condition_type ============ {condition_type}")
+                if condition_type == "str":
+                    mess = condition_text(condition_cf, response_data, service_name, t_u)
+                    if mess is not None:
+                        raise mess
+                else:
+                    mess = condition_json(condition_cf, response_data, service_name, t_u)
+                    if mess is not None:
+                        raise mess
+
                 #     Thực hiện lấy response trả về "_" và lưu vào globalVal
                 if _pr is not None:
                     for k, v in _pr.items():
@@ -221,18 +237,18 @@ def read_json_file(service_name, day_run):
             # print(f"========================== check send ==========================> {check_send}")
             mess = f"✅✅✅ SUCCESS!!! \n Số lượng request: {dem} \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
             print(f"========== \n Kết thúc và không gửi thông báo \n ============")
-            if is_send_success != "true":
+            if success_msg != "true":
                 asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
         message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("lỗi đâyyyyy: ", message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     except Exception as err:
         message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
-        print("lỗi đâyyyyy: ")  # , message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        print("lỗi đâyyyyy: ", err)  # , message)
+        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     return
 
@@ -252,6 +268,56 @@ async def send_mess_format_text(api_key, _chat_id, _from, _mess="Hello world", _
     else:
         await bot.send_message(chat_id=_chat_id,
                                text=f"From [{_from}]\n{_mess}")
+
+
+def check_type_condition(value_condition):
+    try:
+        json.loads(value_condition)
+        is_json = True
+        return "JSON"
+    except JSONDecodeError:
+        is_str = isinstance(value_condition, str)
+        if is_str is True:
+            return "str"
+
+
+def condition_text(value_condition, response_data, service_name, user):
+    global message
+    if value_condition not in response_data:
+        message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                   f"Kết quả trả về không chứa {value_condition}. \n {user} vui lòng kiểm tra.")
+        print(f" ===================== nội dung thông báo khi không đúng với đoạn text điều kiện: {message}")
+    else:
+        print(f"============ kết quả trả về có đoạn {value_condition}")
+    return message
+
+
+# trường hợp điều kiện là json:
+#  trường hợp giá trị không phải số -> so sánh bình thường =======> {$abc : "abcd"} -> biến abc có giá trị abcd
+#  trường hợp giá trị là số {$a : {< hoặc > hoặc = : 3"}}
+def condition_json(value_condition, response_data, service_name, user):
+    k_c = list(value_condition.keys())[0]
+    v_c = value_condition[k_c]
+    k_c = k_c[1:]
+    print(f"================ tên biến trong file config là =============== > {k_c}")
+    for key in response_data.keys():
+        if k_c == key:  # có tồn tại biến đó trong config
+            if response_data[key] != v_c:
+                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                           f"Kết quả trả về không đúng {k_c} : {response_data[k_c]} với điều kiện là {k_c}: {v_c} \n {user} vui lòng kiểm tra.")
+                return message
+        # kiểm tra có tồn tại trong danh sách key của value của config không (value là json,
+        # kiểm tra có tồn tại key điều kiện trong json đó không)
+        else:
+            if key.k_c not in response_data:
+                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                           f"Kết quả trả về không tồn tại *{k_c}* \n {user} vui lòng kiểm tra.")
+                return message
+            else:
+                if response_data[key][k_c] != v_c:
+                    message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                               f"Kết quả trả về không đúng {k_c} : {response_data[k_c]} với điều kiện là {k_c}: {v_c} \n {user} vui lòng kiểm tra.")
+                    return message
 
 
 def readFile(path):
