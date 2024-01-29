@@ -1,13 +1,12 @@
 {
-    "hash_sodoAddFile": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_2f152057-bbf1-11ee-9e75-59d3296904c2",
-    "hash_CVVB": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_2f4557c2-bbf1-11ee-ba09-b5ec2766e011",
-    "hash_CategoryVat": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_3032c55c-bbf1-11ee-9e75-4954b7d53412",
-    "hash_PXK": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_30b513f4-bbf1-11ee-b836-955593357d27",
-    "hash_DKDNM": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_3166ff4c-bbf1-11ee-ba09-e3b85415ba17",
-    "hash_DocVat": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_34b65166-bbf1-11ee-8bb5-0f97b76f564b",
-    "hash_Docpxk": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_355af5d6-bbf1-11ee-ba09-a1a3a7ccb858",
-    "hash_DKKDpdf": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_3908e23e-bbf1-11ee-b836-cbcb9199108b",
-    "hash_DKKDimage": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_3b98191c-bbf1-11ee-ba09-bf0065a7efc8",
-    "hash_Sodo": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_3cdbe330-bbf1-11ee-a428-af4e21eeb2db",
-    "hash_Trangsach": "idg20240126-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_410541a0-bbf1-11ee-a428-8588f949f625"
+    "hash_sodoAddFile": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6146f375-be8d-11ee-9e75-63ee632bf718",
+    "hash_CVVB": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6180c8fa-be8d-11ee-ba09-5b37b9a06799",
+    "hash_CategoryVat": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_62711bde-be8d-11ee-a428-ed8d78743ece",
+    "hash_PXK": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6608e912-be8d-11ee-8bb5-932872d9b54b",
+    "hash_DKDNM": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_670326cc-be8d-11ee-8559-a3a8e388f0fe",
+    "hash_DocVat": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6938a472-be8d-11ee-8559-7ff2d297d927",
+    "hash_Docpxk": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_69d5cef1-be8d-11ee-9e75-c92a630b0207",
+    "hash_DKKDpdf": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6ba893d2-be8d-11ee-8bb5-fd71c8d107ce",
+    "hash_DKKDimage": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6c7e0b6c-be8d-11ee-ba09-8d1ab1e3a60c",
+    "hash_Sodo": "idg20240129-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6d952134-be8d-11ee-a428-d127c5aa16ea"
 }
