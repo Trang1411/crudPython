@@ -202,45 +202,43 @@ def read_json_file(service_name, day_run):
                             globalVal[k] = value
                         else:
                             globalVal[k] = globalVal.get(path)
-                            # check response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
-                            check_resp = check_response(response_data, method, url, body, service_name)
-                            if "message" in check_resp and check_resp.get("type") == "error":
-                                # print(f' message báo lỗi ======= {check_resp.get("message")}'
-                                #       f"\n Thực hiện {method} đến url: {url}"
-                                #       f"\n Body: {body}"
-                                #       )
-                                # gửi lên telegram
-                                raise ValueError(check_resp.get("message"))
-                            if "message" in check_resp and check_resp.get("type") == "warning":
-                                # gửi lên telegram
-                                mess_warning = check_resp.get("message")
-                                # print(f' message cảnh báo ======= {mess_warning}')
-                                # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
-                    print(f"global_val TYPE================ {type(globalVal)}")
-                    if condition_cf is not None:
-                        mess_condition = condition_text(condition_cf, response_data, globalVal, service_name, t_u)
-                        if mess_condition is not None:
-                            asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_condition))
-
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
+                # check response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
+                check_resp = check_response(response_data, method, url, body, service_name)
+                if "message" in check_resp and check_resp.get("type") == "error":
+                    # print(f' message báo lỗi ======= {check_resp.get("message")}'
+                    #       f"\n Thực hiện {method} đến url: {url}"
+                    #       f"\n Body: {body}"
+                    #       )
+                    # gửi lên telegram
+                    raise ValueError(check_resp.get("message"))
+                if "message" in check_resp and check_resp.get("type") == "warning":
+                    # gửi lên telegram
+                    mess_warning = check_resp.get("message")
+                    print(f' message cảnh báo ======= {mess_warning}')
+                    asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
+                if condition_cf is not None:
+                    mess_condition = check_condition(condition_cf, response_data, globalVal, service_name, t_u)
+                    print(f" message kết quả check condition ============= {mess_condition}")
+                    if mess_condition is not None:
+                        print("có vào đến đây ==================")
+                        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_condition))
 
-            # check_send = data_file_json["config_file"]["is_send_success"]
-            # print(f"========================== check send ==========================> {check_send}")
-            mess = f"✅✅✅ SUCCESS!!! \n Số lượng request: {dem} \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
-            print(f"========== \n Kết thúc và không gửi thông báo \n ============")
-            if success_msg != "true":
+            if success_msg == "true" and check_resp == {}:
+                print(f"========== \n Kết thúc và không gửi thông báo \n ============")
+                mess = f"✅✅✅ SUCCESS!!! \n Số lượng request: {dem} \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
                 asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
         message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("lỗi đâyyyyy (ValueError): ", message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     except Exception as err:
         message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
-        print("========== > Exception: ", message)  # , message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        print("========== > Exception: ", message)
+        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     return
 
@@ -262,70 +260,68 @@ async def send_mess_format_text(api_key, _chat_id, _from, _mess="Hello world", _
                                text=f"From [{_from}]\n{_mess}")
 
 
-def check_type_condition(value_condition):
-    is_str = isinstance(value_condition, str)
-    if is_str is True:
-        return "str"
-    else:
-        return "dict"
-
-
-def condition_text(condition, response_data, globalVal, service_name, user):
-    global message, variable, operator, value_condition
+def check_condition(conditions, response_data, globalVal, service_name, user):
     # tách condition thành các thành phần biến | toán tử (nếu có) | giá trị so sánh của biến
-
-    for cond in condition:
+    global message
+    print("000000000000000")
+    for cond in conditions:
         conds = cond.split("|")
         variable = conds[0]
         variable = variable[1:]
-        if len(conds) == 3:
-            operator = conds[1]
-        else:
-            value_condition = conds[-1]
-            value_condition = value_condition.replace("%", "")
-        print(f" tên biến là {variable}, với giá trị so sánh là {value_condition}")
-
-        # lấy biến và giá trị tương ứng trong điều kiện so sánh với response_data
-        # kiểm tra nếu không có biến đó trong response_data hoặc không có trong "_" (globalVal)=> báo lỗi
+        value_condition = conds[-1]
+        value_condition = value_condition.replace("%", "")
+        print(f" biến và giá trị điều kiện là {variable} : {value_condition}")
+        # kiểm tra nếu không có biến điều kiện trong response_data hoặc không có trong "_" (globalVal)=> báo lỗi
         if variable not in response_data and variable not in globalVal.keys():
             message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
                        f"Kết quả trả về không chứa {variable}. \n {user} vui lòng kiểm tra.")
             print(f" ===================== nội dung thông báo: không đúng với đoạn text điều kiện: {message}")
-        # nếu có biến trong response hoặc "_" (globalVal) thì so sánh giá trị trả về với điều kiện
-        if variable in response_data or variable in globalVal:
-            print(f"============ kết quả trả về có {variable}")
-            # nếu chứa toán tử
-            # if operator is not None:
-            #     response_data["object"][variable]  value_condition
-            if value_condition not in globalVal[variable]:
+            return message
+        if len(conds) == 3:
+            operator = conds[1]
+            print("2222222222222222222222222")
+            result1 = condition_operator(variable, operator, value_condition, response_data, globalVal)
+            print(f" ======================== >  kết quả so sánh phần toán tử là {result1}")
+            if not result1:
+                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                           f"Kết quả trả về không thỏa mãn điều kiện {variable} {operator} {value_condition} \n {user} vui lòng kiểm tra.")
+            return message
+        else:
+            result2 = condition_text(variable, value_condition, response_data, globalVal)
+            if not result2:
                 message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
                            f"Kết quả trả về giá trị của {variable} không chứa {value_condition}. \n {user} vui lòng kiểm tra.")
-        return message
+            return message
+    return None
 
 
-def condition_json(value_condition, response_data, service_name, user):
-    k_c = list(value_condition.keys())[0]
-    v_c = value_condition[k_c]
-    k_c = k_c[1:]
-    print(f"================ tên biến trong file config là =============== > {k_c}")
-    for key in response_data.keys():
-        if k_c == key:  # có tồn tại biến đó trong config
-            if response_data[key] != v_c:
-                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
-                           f"Kết quả trả về không đúng {k_c} : {response_data[k_c]} với điều kiện là {k_c}: {v_c} \n {user} vui lòng kiểm tra.")
-                return message
-        # kiểm tra có tồn tại trong danh sách key của value của config không (value là json,
-        # kiểm tra có tồn tại key điều kiện trong json đó không)
-        else:
-            if key.k_c not in response_data:
-                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
-                           f"Kết quả trả về không tồn tại *{k_c}* \n {user} vui lòng kiểm tra.")
-                return message
-            else:
-                if response_data[key][k_c] != v_c:
-                    message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
-                               f"Kết quả trả về không đúng {k_c} : {response_data[k_c]} với điều kiện là {k_c}: {v_c} \n {user} vui lòng kiểm tra.")
-                    return message
+def condition_text(variable, value_condition, response_data, globalVal):
+    print(f" tên biến là {variable}, với giá trị so sánh là {value_condition}")
+    # nếu có biến trong response hoặc "_" (globalVal) thì so sánh giá trị trả về với điều kiện
+    if variable in response_data or variable in globalVal:
+        # print(f"============ kết quả trả về có {variable}")
+        # print(f" kiểm tra giá trị theo biến trong global ========== {globalVal[variable]}")
+        if value_condition not in globalVal[variable]:
+            return False
+    return True
+
+
+def condition_operator(variable, operator, value_condition, response_data, globalVal):
+    if operator == ">=":
+        print(f"3333333333333 operator là {operator} và type của operator là {type(operator)}")
+
+    if operator == ">" and (response_data[variable] <= value_condition or globalVal[variable] <= value_condition):
+        return False
+    if operator == ">=" and (response_data[variable] < value_condition or globalVal[variable] < value_condition):
+        print("444444444444444444444444")
+        return False
+    if operator == "=" and (response_data[variable] != value_condition or globalVal[variable] != value_condition):
+        return False
+    if operator == "<" and (response_data[variable] >= value_condition or globalVal[variable] >= value_condition):
+        return False
+    if operator == "<=" and (response_data[variable] > value_condition or globalVal[variable] > value_condition):
+        return False
+    return True
 
 
 def readFile(path):

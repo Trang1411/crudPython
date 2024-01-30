@@ -340,7 +340,11 @@
         "token": "8928skjhfa89298jahga1771vbvb",
         "client_session": "00-14-22-01-23-45-1548211589291",
         "type": "pdf"
-      }
+      },
+      "_": {
+        "challengeCode_value": "$challengeCode"
+      },
+       "condition": ["$challengeCode_value|>=|11114"]
     },
     {
       "url": "https://api.idg.vnpt.vn/file-service/v1/addFile",
@@ -360,7 +364,7 @@
         "hash_Trangsach": "$object.hash",
         "param_condition": "$object.fileName"
       },
-      "condition": ["$param_condition|%Trangsach%"]
+      "condition": ["$param_condition|%Trangvo%"]
     },
     {
       "url": "https://api.idg.vnpt.vn/rpa-service/aidigdoc/ocr-general",
@@ -380,7 +384,7 @@
       }
     }
   ],
-  "success_msg": "true",
+  "success_msg": "false",
   "time_set": {
     "EVT": [
       "15"

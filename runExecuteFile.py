@@ -2,8 +2,10 @@ import os
 import time
 
 import schedule
+from flask import json
+import re
 
-from lib import readFile, evt, evd, evm
+from lib import readFile, evt, evd, evm, writeFile
 
 if __name__ == '__main__':
     botDatas = files = os.listdir("botData")
@@ -34,3 +36,15 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+    # with open("response_post_sodo.txt", "r", encoding="utf-8") as f:
+    #     data = f.read()
+    # data = data.replace("'", '"')
+    # print(data)
+    # with open("response_post_sodo.json", "w") as f:
+    #     json.dump(data, f)
+
+
+
+
+
