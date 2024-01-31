@@ -58,7 +58,11 @@
         "token": "8928skjhfa89298jahga1771vbvb",
         "client_session": "00-14-22-01-23-45-1548211589291",
         "type": "pdf"
-      }
+      },
+      "_": {
+        "left_m_cited_CVVB": "$object.left_m_cited"
+      },
+      "condition": ["$left_m_cited_CVVB|%nhận văn bản điện tử%"]
     },
     {
       "url": "https://api.idg.vnpt.vn/file-service/v1/addFile",
@@ -344,7 +348,7 @@
       "_": {
         "challengeCode_value": "$challengeCode"
       },
-       "condition": ["$challengeCode_value|>=|11114"]
+       "condition": ["$challengeCode_value|>|11111"]
     },
     {
       "url": "https://api.idg.vnpt.vn/file-service/v1/addFile",

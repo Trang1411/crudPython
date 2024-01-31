@@ -1,13 +1,16 @@
 {
-    "hash_sodoAddFile": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d1ab2129-bf56-11ee-9e75-f94d0df5492e",
-    "hash_CVVB": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d1dae477-bf56-11ee-8bb5-ab9c2f6b2c44",
-    "hash_CategoryVat": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d2d2b212-bf56-11ee-8559-c11dc6d87ecd",
-    "hash_PXK": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d33eba3d-bf56-11ee-8bb5-d916ae755e66",
-    "hash_DKDNM": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d3f70cf0-bf56-11ee-ba09-9bb0781e9b80",
-    "hash_DocVat": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d637390b-bf56-11ee-9e75-5d6e04eabc2c",
-    "hash_Docpxk": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d6d48b4e-bf56-11ee-8559-3313ac1f2939",
-    "hash_DKKDpdf": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d8996c01-bf56-11ee-9e75-3f92bc82c83e",
-    "hash_DKKDimage": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_d96d0f88-bf56-11ee-8559-217ccf01f4ef",
-    "hash_Sodo": "idg20240130-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_da711296-bf56-11ee-b836-8f5ee36b60f5",
-    "challengeCode_value": "11111"
+    "hash_sodoAddFile": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_546f5d16-bfee-11ee-ba09-fd2f8c909115",
+    "hash_CVVB": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_54a20551-bfee-11ee-b836-a95f78264fcd",
+    "left_m_cited_CVVB": "Về việc gửi, nhận văn bản điện tử giữa các cơ quan trong hệ thống hành chính nhà nước",
+    "hash_CategoryVat": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_59448b28-bfee-11ee-a428-730df89b6c1c",
+    "hash_PXK": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_5cce9cd9-bfee-11ee-9e75-eb86f36c3156",
+    "hash_DKDNM": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_5d919ef4-bfee-11ee-ba09-cd7dd38fb953",
+    "hash_DocVat": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_5fd48a1a-bfee-11ee-ba09-db65a1b918c2",
+    "hash_Docpxk": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_60905fd1-bfee-11ee-9e75-294757da147b",
+    "hash_DKKDpdf": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_65453566-bfee-11ee-8559-f5ac2a45dde8",
+    "hash_DKKDimage": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6954c9f4-bfee-11ee-b836-21f70789d254",
+    "hash_Sodo": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_6a688459-bfee-11ee-8bb5-15d9ff7b286d",
+    "challengeCode_value": "11111",
+    "hash_Trangsach": "idg20240131-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_70490887-bfee-11ee-9e75-bd3cdce62656",
+    "param_condition": "Trangsach"
 }

@@ -114,7 +114,7 @@ def check_response(response_data, method, url, body, service_name):
 
 
 def read_json_file(service_name, day_run):
-    global file_path, check_resp, mess, t_u, api_key, chat_id, total_time
+    global file_path, check_resp, mess, t_u, api_key, chat_id, total_time, method, url
     try:
         time_start = time.time()
         # print(f"day run ===== {day_run} và json_file ==== {service_name}")
@@ -123,8 +123,7 @@ def read_json_file(service_name, day_run):
             globalVal = {}
             # Đọc file json
             path = os.path.join("botData", service_name, "config.json")
-            with open(path, "r") as file:
-                data_file_json = json.load(file)
+            data_file_json = readFile(path)
 
             # lấy thông tin gửi lên telegram
             api_key = data_file_json.get("token_telegram")
@@ -151,8 +150,9 @@ def read_json_file(service_name, day_run):
                 _pr = config_file_json.get("_")
                 method = config_file_json.get("method")
                 condition_cf = config_file_json.get("condition")
-                print(f"condition ================ {condition_cf}")
                 print(f"type ================ {type(condition_cf)}")
+                print(f"condition ================ {condition_cf}")
+
                 response_data = {}
 
                 # check body của mỗi item để chuẩn bị request
@@ -197,11 +197,14 @@ def read_json_file(service_name, day_run):
                         path = v.replace("$", "")
                         # print("v_path  ======", path)
                         value = get_value_by_path(response_data.get("response_data"), path)
+                        print(f"============ > value khi lưu vào myVal là :::::: {value}")
                         if value is not None:
                             # Lấy danh sách các điều kiện để kiểm tra với response của mỗi request
                             globalVal[k] = value
+                            print(f" ============= > sau khi gán giá trị vào biến của global là : {globalVal[k]}")
                         else:
                             globalVal[k] = globalVal.get(path)
+                            print(f" ========> khi value NONE => giá trị khi lưu vào biến trong globalVal là {globalVal[k]}")
                     # Ghi dữ liệu của "_" vào file myVal.txt
                     writeFile("myVal.txt", globalVal)
                 # check response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
@@ -219,11 +222,11 @@ def read_json_file(service_name, day_run):
                     print(f' message cảnh báo ======= {mess_warning}')
                     asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_warning))
                 if condition_cf is not None:
-                    mess_condition = check_condition(condition_cf, response_data, globalVal, service_name, t_u)
+                    mess_condition = check_condition(condition_cf, globalVal, service_name, t_u)
                     print(f" message kết quả check condition ============= {mess_condition}")
                     if mess_condition is not None:
                         print("có vào đến đây ==================")
-                        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_condition))
+                        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_condition))
 
             if success_msg == "true" and check_resp == {}:
                 print(f"========== \n Kết thúc và không gửi thông báo \n ============")
@@ -231,14 +234,14 @@ def read_json_file(service_name, day_run):
                 asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
     except ValueError as err:
-        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {method}: {url} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("lỗi đâyyyyy (ValueError): ", message)
-        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     except Exception as err:
-        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {err}. \n {t_u} vui lòng kiểm tra."
+        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {method}: {url} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("========== > Exception: ", message)
-        # asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
+        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
 
     return
 
@@ -260,10 +263,9 @@ async def send_mess_format_text(api_key, _chat_id, _from, _mess="Hello world", _
                                text=f"From [{_from}]\n{_mess}")
 
 
-def check_condition(conditions, response_data, globalVal, service_name, user):
+def check_condition(conditions, globalVal, service_name, user):
     # tách condition thành các thành phần biến | toán tử (nếu có) | giá trị so sánh của biến
     global message
-    print("000000000000000")
     for cond in conditions:
         conds = cond.split("|")
         variable = conds[0]
@@ -272,67 +274,69 @@ def check_condition(conditions, response_data, globalVal, service_name, user):
         value_condition = value_condition.replace("%", "")
         print(f" biến và giá trị điều kiện là {variable} : {value_condition}")
         # kiểm tra nếu không có biến điều kiện trong response_data hoặc không có trong "_" (globalVal)=> báo lỗi
-        if variable not in response_data and variable not in globalVal.keys():
-            message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+        if variable not in globalVal.keys():
+            message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n {method}: {url}"
                        f"Kết quả trả về không chứa {variable}. \n {user} vui lòng kiểm tra.")
             print(f" ===================== nội dung thông báo: không đúng với đoạn text điều kiện: {message}")
             return message
         if len(conds) == 3:
             operator = conds[1]
-            print("2222222222222222222222222")
-            result1 = condition_operator(variable, operator, value_condition, response_data, globalVal)
+            result1 = condition_operator(variable, operator, value_condition, globalVal)
             print(f" ======================== >  kết quả so sánh phần toán tử là {result1}")
             if not result1:
-                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n {method}: {url} "
                            f"Kết quả trả về không thỏa mãn điều kiện {variable} {operator} {value_condition} \n {user} vui lòng kiểm tra.")
-            return message
+                return message
         else:
-            result2 = condition_text(variable, value_condition, response_data, globalVal)
+            result2 = condition_text(variable, value_condition, globalVal)
             if not result2:
-                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n "
+                message = (f"❌❌❌ ERROR (không đạt điều kiện)\n Dịch vụ {service_name} \n {method}: {url} "
                            f"Kết quả trả về giá trị của {variable} không chứa {value_condition}. \n {user} vui lòng kiểm tra.")
-            return message
+                return message
     return None
 
 
-def condition_text(variable, value_condition, response_data, globalVal):
+def condition_text(variable, value_condition, globalVal):
     print(f" tên biến là {variable}, với giá trị so sánh là {value_condition}")
     # nếu có biến trong response hoặc "_" (globalVal) thì so sánh giá trị trả về với điều kiện
-    if variable in response_data or variable in globalVal:
-        # print(f"============ kết quả trả về có {variable}")
+    if variable not in globalVal or value_condition not in globalVal[variable]:
         # print(f" kiểm tra giá trị theo biến trong global ========== {globalVal[variable]}")
-        if value_condition not in globalVal[variable]:
-            return False
+        return False
     return True
 
 
-def condition_operator(variable, operator, value_condition, response_data, globalVal):
-    if operator == ">=":
-        print(f"3333333333333 operator là {operator} và type của operator là {type(operator)}")
-
-    if operator == ">" and (response_data[variable] <= value_condition or globalVal[variable] <= value_condition):
+def condition_operator(variable, operator, value_condition, globalVal):
+    if operator == ">" and globalVal[variable] <= value_condition:
         return False
-    if operator == ">=" and (response_data[variable] < value_condition or globalVal[variable] < value_condition):
-        print("444444444444444444444444")
+    if operator == ">=" and globalVal[variable] < value_condition:
         return False
-    if operator == "=" and (response_data[variable] != value_condition or globalVal[variable] != value_condition):
+    if operator == "=" and globalVal[variable] != value_condition:
         return False
-    if operator == "<" and (response_data[variable] >= value_condition or globalVal[variable] >= value_condition):
+    if operator == "<" and globalVal[variable] >= value_condition:
         return False
-    if operator == "<=" and (response_data[variable] > value_condition or globalVal[variable] > value_condition):
+    if operator == "<=" and globalVal[variable] > value_condition:
         return False
     return True
 
 
 def readFile(path):
-    with open(path, "r") as rf:
+    with open(path, "rb") as rf:
         data = json.load(rf)
     return data
 
 
 def writeFile(filename, dataSave):
-    with open(filename, "w") as saveData:
-        json.dump(dataSave, saveData, indent=4)
+    with open(filename, "w", encoding="utf-8") as saveData:
+        json.dump(dataSave, saveData, indent=4, ensure_ascii=False)
+
+
+def writeFiletxt(filename, dataSave):
+    # Mã hóa dữ liệu sang UTF-8
+    data = dataSave.encode("utf-8")
+
+    # Lưu dữ liệu vào file txt
+    with open(filename, "wb") as f:
+        f.write(data)
 
 
 def updateFile(filename, dataSave):
