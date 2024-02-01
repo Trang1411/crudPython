@@ -63,7 +63,7 @@
                 "left_m_cited_CVVB": "$object.left_m_cited"
             },
             "condition": [
-                "$left_m_cited_CVVB|%nháº­n vÄƒn báº£n Ä‘iá»‡n tá»­%"
+                "$left_m_cited_CVVB|%nhận văn bản điện tử%"
             ]
         },
         {
