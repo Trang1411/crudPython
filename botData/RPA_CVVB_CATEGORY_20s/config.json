@@ -2,8 +2,7 @@
     "token_telegram": "5579530637:AAHiJONsPHZ0bTsiHANWBrfqvE4QoRv0BlM",
     "chat_id": "-419391239",
     "user_telegram": [
-        "ailatatalaai",
-        "thutrang"
+        "ailatatalaai"
     ],
     "config_file": [
         {
@@ -61,10 +60,7 @@
             },
             "_": {
                 "left_m_cited_CVVB": "$object.left_m_cited"
-            },
-            "condition": [
-                "$left_m_cited_CVVB|%nhận văn bản điện tử%"
-            ]
+            }
         },
         {
             "url": "https://api.idg.vnpt.vn/file-service/v1/addFile",
@@ -349,10 +345,7 @@
             },
             "_": {
                 "challengeCode_value": "$challengeCode"
-            },
-            "condition": [
-                "$challengeCode_value|>|11111"
-            ]
+            }
         },
         {
             "url": "https://api.idg.vnpt.vn/file-service/v1/addFile",
@@ -371,10 +364,7 @@
             "_": {
                 "hash_Trangsach": "$object.hash",
                 "param_condition": "$object.fileName"
-            },
-            "condition": [
-                "$param_condition|%Trangvo%"
-            ]
+            }
         },
         {
             "url": "https://api.idg.vnpt.vn/rpa-service/aidigdoc/ocr-general",
@@ -396,7 +386,7 @@
     ],
     "time_set": {
         "EVT": [
-            "15"
+            "20"
         ]
     }
 }

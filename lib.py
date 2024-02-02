@@ -206,7 +206,7 @@ def read_json_file(service_name, day_run):
                             globalVal[k] = globalVal.get(path)
                             print(f" ========> khi value NONE => giá trị khi lưu vào biến trong globalVal là {globalVal[k]}")
                     # Ghi dữ liệu của "_" vào file myVal.txt
-                    writeFile("myVal.txt", globalVal)
+                    writeFile("myVal.json", globalVal)
                 # check response_data, nếu có message thì gửi thông báo lên telegram theo type (error/ warning)
                 check_resp = check_response(response_data, method, url, body, service_name)
                 if "message" in check_resp and check_resp.get("type") == "error":
@@ -233,11 +233,10 @@ def read_json_file(service_name, day_run):
                 mess = f"✅✅✅ SUCCESS!!! \n Số lượng request: {dem} \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
                 asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
-    except ValueError as err:
-        message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {method}: {url} \n {err}. \n {t_u} vui lòng kiểm tra."
-        print("lỗi đâyyyyy (ValueError): ", message)
-        asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
-
+    # except ValueError as err:
+    #     message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {method}: {url} \n {err}. \n {t_u} vui lòng kiểm tra."
+    #     print("lỗi đâyyyyy (ValueError): ", message)
+    #     asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", message))
     except Exception as err:
         message = f"❌❌❌ ERROR \n Dịch vụ {service_name} \n {method}: {url} \n {err}. \n {t_u} vui lòng kiểm tra."
         print("========== > Exception: ", message)

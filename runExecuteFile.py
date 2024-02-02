@@ -2,8 +2,6 @@ import os
 import time
 
 import schedule
-from flask import json
-import re
 
 from lib import readFile, evt, evd, evm, writeFile
 
