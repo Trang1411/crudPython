@@ -384,6 +384,7 @@
             }
         }
     ],
+    "success_msg": "true",
     "time_set": {
         "EVT": [
             "20"
