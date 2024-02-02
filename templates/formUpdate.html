@@ -42,6 +42,12 @@
                         required
                         value="{{ user_telegram }}"/>
           </span>
+            <label>Gửi thông báo khi thành công: </label>
+            <span>
+                 <input id="success_msg" name="success_msg" type="text" placeholder="True"
+                        required
+                        value="{{ success_msg }}"/>
+          </span>
             <label>Config: </label>
             <span>
                 <textarea name="config_file" id="config_file" rows="36" cols="60"
@@ -154,6 +160,9 @@
 
     // Lấy nội dung config_file
     config_file = document.getElementById("config_file");
+
+    // Lấy success_msg
+    success_msg = document.getElementById("success_msg");
 
    // lấy select và input tương ứng
      select = document.getElementById("selectTag");

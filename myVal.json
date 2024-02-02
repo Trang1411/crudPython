@@ -1,12 +1,16 @@
 {
-    "hash_sodoAddFile": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_268d6318-c16d-11ee-8559-d76b2d970adf",
-    "hash_CVVB": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_26f0438a-c16d-11ee-ba09-5bac511b2202",
+    "hash_sodoAddFile": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_740b2e03-c178-11ee-9e75-f91f192eac6e",
+    "hash_CVVB": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_7478e46e-c178-11ee-a428-213da6486afc",
     "left_m_cited_CVVB": "Về việc gửi, nhận văn bản điện tử giữa các cơ quan trong hệ thống hành chính nhà nước",
-    "hash_CategoryVat": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_28459a5b-c16d-11ee-8bb5-87b70d5f5b39",
-    "hash_PXK": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_28e89041-c16d-11ee-9e75-37c3bf900581",
-    "hash_DKDNM": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_2a2296e3-c16d-11ee-9e75-f9650bcaaaba",
-    "hash_DocVat": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_2ca28be4-c16d-11ee-ba09-1fb9103789bb",
-    "hash_Docpxk": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_2d62f5b8-c16d-11ee-ba09-83e818729f08",
-    "hash_DKKDpdf": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_2fa17320-c16d-11ee-8559-956e694f01a6",
-    "hash_DKKDimage": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_32c71d15-c16d-11ee-8bb5-a71127e04a48"
+    "hash_CategoryVat": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_75865c4e-c178-11ee-ba09-512a8ae9b05e",
+    "hash_PXK": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_78f7403e-c178-11ee-9e75-bb7ba815005c",
+    "hash_DKDNM": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_79cc6a84-c178-11ee-ba09-7bb0380448a2",
+    "hash_DocVat": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_7c49edae-c178-11ee-ba09-b93ee6c3f6f7",
+    "hash_Docpxk": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_7d200247-c178-11ee-8bb5-49c177b69740",
+    "hash_DKKDpdf": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_7f37bee2-c178-11ee-ba09-bd4088d41e9c",
+    "hash_DKKDimage": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_8072d6df-c178-11ee-8bb5-c7aa2cd125fc",
+    "hash_Sodo": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_8197f611-c178-11ee-ba09-85f6f7b74154",
+    "challengeCode_value": "11111",
+    "hash_Trangsach": "idg20240202-d46da0fe-13fd-26d1-e053-62199f0ac7d3/IDG01_84573d32-c178-11ee-8559-217ca0bbdb53",
+    "param_condition": "Trangsach"
 }

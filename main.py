@@ -1,8 +1,8 @@
 import csv
 import json
-import os
 
 import requests
+
 
 def main():
     globalVal = {}
@@ -46,6 +46,7 @@ def main():
             for key, value in globalVal.items():
                 writer.writerow([key, value])
 
+
 def _post(url, headers, body):
     response = requests.post(url, headers=headers, data=body)
     response.raise_for_status()
@@ -68,6 +69,7 @@ def _upload_file(url, headers, body):
     response = requests.post(url, headers=headers, files=body)
     response.raise_for_status()
     return response.json()
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

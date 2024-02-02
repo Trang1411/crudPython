@@ -1,16 +1,13 @@
 import json
 import os
 import shutil
+import zipfile
 from json import JSONDecodeError
-from PIL import Image
-import ast
 
-from flask import Flask, render_template, request, flash, session, redirect, send_file,jsonify
-from flask import Flask, render_template, request, flash, session, redirect, send_file,jsonify
+from flask import Flask, render_template, request, flash, session, redirect, jsonify
 from werkzeug.utils import secure_filename
 
-from lib import writeFile, checkhhmmss, updateFile, delete_service_before_update
-import zipfile
+from lib import writeFile, checkhhmmss
 
 app = Flask(__name__)
 
@@ -170,6 +167,7 @@ def update_service():
         service_name_request = request.form.get("service_name")
         config_file_requests = request.form.get("config_file")
         user_telegram_request = request.form.get("user_telegram")
+        success_msg_request = request.form.get("success_msg")
         attach_files = request.files.getlist("filetests")
         evd = request.form.getlist('evd[]')
         evt = request.form.getlist('evt[]')
@@ -199,6 +197,7 @@ def update_service():
         session["token_telegram"] = token_telegram_request
         session["chat_id"] = chat_id_request
         session["user_telegram"] = user_telegram_request
+        session["success_msg"] = success_msg_request
         session["config_file"] = config_file_requests
         session["evd"] = evd
         session["evt"] = evt
@@ -231,6 +230,7 @@ def update_service():
                                        token_telegram=session.get("token_telegram"),
                                        group_id=session.get("group_id"),
                                        user_telegram=session.get("user_telegram"),
+                                       success_msg=session.get("success_msg"),
                                        config_file=session.get("config_file"),
                                        evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
         except JSONDecodeError as e:
@@ -241,6 +241,7 @@ def update_service():
                                    token_telegram=session.get("token_telegram"),
                                    group_id=session.get("group_id"),
                                    user_telegram=session.get("user_telegram"),
+                                   success_msg=session.get("success_msg"),
                                    config_file=session.get("config_file"),
                                    evt=session.get("evt"), evd=session.get("evd"), evm=session.get("evm"))
 
@@ -252,6 +253,7 @@ def update_service():
             "chat_id": chat_id_request,
             "user_telegram": user_telegram_save,
             "config_file": data_conf,
+            "success_msg": success_msg_request,
             "time_set": time_set
         }
 
@@ -267,6 +269,7 @@ def update_service():
         chat_id_get = data.get("chat_id")
         user_telegram_get = data.get("user_telegram")
         user_telegram_get = ",".join(user_telegram_get)
+        success_msg_get = data.get("success_msg")
         config_file_get = json.dumps(data.get("config_file"))
         # config = json.dumps(config_file_get)
         # print(f"file in config :::: {file}")
@@ -301,8 +304,9 @@ def update_service():
             print(f" tên các file ảnh là {_files}")
         return render_template("formUpdate.html", service_name=service_name_get,
                                token_telegram=token_telegram_get, chat_id=chat_id_get,
-                               user_telegram=user_telegram_get, config_file=config_file_get,
-                               time_set_data=time_set_get, evt=evt_get, evd=evd_get,
+                               user_telegram=user_telegram_get, success_msg=success_msg_get,
+                               config_file=config_file_get, time_set_data=time_set_get,
+                               evt=evt_get, evd=evd_get,
                                evm=evm_get, _files=_files)
 
 

@@ -7,16 +7,11 @@ import re
 import shutil
 import time
 from functools import partial
-from json import JSONDecodeError
 
 import requests
 import schedule
-from flask import jsonify
 from telegram import Bot
 
-
-# import tracemalloc
-# tracemalloc.start()
 
 def _post(url, headers, body):
     # print("URL POST", url)
@@ -229,7 +224,7 @@ def read_json_file(service_name, day_run):
                         asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess_condition))
 
             if success_msg == "true" and check_resp == {}:
-                print(f"========== \n Kết thúc và không gửi thông báo \n ============")
+                print(f"========== \n Kết thúc và gửi thông báo \n ============")
                 mess = f"✅✅✅ SUCCESS!!! \n Số lượng request: {dem} \n Thời gian chạy dịch vụ **{service_name}** là {total_time} giây."
                 asyncio.run(send_mess_format_text(api_key, chat_id, "BOT SYSTEM", mess))
 
