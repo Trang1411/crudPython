@@ -300,15 +300,16 @@ def condition_text(variable, value_condition, globalVal):
 
 
 def condition_operator(variable, operator, value_condition, globalVal):
-    if operator == ">" and globalVal[variable] <= value_condition:
+    print(f"TYPE của giá trị trong điều kiện là {type(value_condition)}")
+    if operator == ">" and globalVal[variable] <= float(value_condition):
         return False
-    if operator == ">=" and globalVal[variable] < value_condition:
+    if operator == ">=" and globalVal[variable] < float(value_condition):
         return False
-    if operator == "=" and globalVal[variable] != value_condition:
+    if operator == "=" and globalVal[variable] != float(value_condition):
         return False
-    if operator == "<" and globalVal[variable] >= value_condition:
+    if operator == "<" and globalVal[variable] >= float(value_condition):
         return False
-    if operator == "<=" and globalVal[variable] > value_condition:
+    if operator == "<=" and globalVal[variable] > float(value_condition):
         return False
     return True
 

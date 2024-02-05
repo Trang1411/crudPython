@@ -39,8 +39,10 @@
                 "_file": "CVVB"
             },
             "_": {
-                "hash_CVVB": "$object.hash"
-            }
+                "hash_CVVB": "$object.hash",
+                "fileName_CVVB": "$object.fileName"
+            },
+            "condition": ["$fileName_CVVB|%CVVB%"]
         },
         {
             "url": "https://api.idg.vnpt.vn/rpa-service/aidigdoc/direct/ocr",
@@ -60,8 +62,10 @@
                 "type": "pdf"
             },
             "_": {
-                "left_m_cited_CVVB": "$object.left_m_cited"
-            }
+                "left_m_cited_CVVB": "$object.left_m_cited",
+                "m_origin_prob_CVVB": "$object.m_origin_prob"
+            },
+            "condition": ["$left_m_cited_CVVB|%gửi, nhận văn bản điện tử giữa các cơ quan%", "$m_origin_prob_CVVB|<=|1"]
         },
         {
             "url": "https://api.idg.vnpt.vn/file-service/v1/addFile",
@@ -366,6 +370,7 @@
                 "hash_Trangsach": "$object.hash",
                 "param_condition": "$object.fileName"
             }
+
         },
         {
             "url": "https://api.idg.vnpt.vn/rpa-service/aidigdoc/ocr-general",
